@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
+        <RootNamespace>ConfirmSteps</RootNamespace>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <PackageId>ConfirmSteps.Net</PackageId>
+        <Title>ConfirmSteps.Net</Title>
+        <Description>A simple testing suite to confirm the sequence of steps</Description>
+        <PackageTags>C#, testing, scenario, api, rest, fluent</PackageTags>
+        <PackageProjectUrl>https://github.com/gcelet/ConfirmSteps.Net</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <ProjectGuid>11aa9456-aca4-40b5-b14e-0d1aad9491e1</ProjectGuid>
+        <IsPackable>True</IsPackable>
+        <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageIcon>motivation.png</PackageIcon>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\" />
+        <None Include="..\..\motivation.png" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
+</Project>
