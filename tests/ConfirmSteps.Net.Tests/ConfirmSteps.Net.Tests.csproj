@@ -12,6 +12,8 @@
         <PackageReference Include="NUnit3TestAdapter" />
         <PackageReference Include="NUnit.Analyzers" />
         <PackageReference Include="coverlet.collector" />
+        <PackageReference Include="FluentAssertions" />
+        <PackageReference Include="WireMock.Net" />
     </ItemGroup>
 
     <ItemGroup>

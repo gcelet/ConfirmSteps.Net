@@ -4,6 +4,13 @@
     </PropertyGroup>
     <!-- App dependencies -->
     <ItemGroup>
+        <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0"/>
+        <PackageVersion Include="JsonPath.Net" Version="0.5.2"/>
+        <PackageVersion Include="JsonCons.JsonPath" Version="1.1.0"/>
+        <PackageVersion Include="AsyncFixer" Version="1.6.0"/>
+        <PackageVersion Include="Meziantou.Analyzer" Version="2.0.36"/>
+        <PackageVersion Include="Roslynator.Analyzers" Version="4.2.0"/>
+        <PackageVersion Include="SonarAnalyzer.CSharp" Version="8.56.0.67649"/>
     </ItemGroup>
     <!-- Test dependencies -->
     <ItemGroup>
@@ -12,10 +19,13 @@
         <PackageVersion Include="NUnit3TestAdapter" Version="4.4.2"/>
         <PackageVersion Include="NUnit.Analyzers" Version="3.6.1"/>
         <PackageVersion Include="coverlet.collector" Version="3.2.0"/>
+        <PackageVersion Include="FluentAssertions" Version="6.11.0"/>
+        <PackageVersion Include="WireMock.Net" Version="1.5.23"/>
     </ItemGroup>
     <!-- Build dependencies -->
     <ItemGroup>
         <PackageVersion Include="Nuke.Common" Version="6.3.0"/>
+        <PackageVersion Include="docfx.console" Version="2.59.4"/>
     </ItemGroup>
     <!-- SourceLink support for all projects -->
     <ItemGroup>

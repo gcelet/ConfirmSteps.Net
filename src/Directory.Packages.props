@@ -1,5 +1,26 @@
 <Project>
     <ItemGroup>
+        <PackageReference Update="Microsoft.Extensions.DependencyInjection"/>
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Update="AsyncFixer">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Update="Meziantou.Analyzer">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Update="Roslynator.Analyzers">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Update="SonarAnalyzer.CSharp">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+    <ItemGroup>
         <PackageReference Update="Microsoft.SourceLink.GitHub" PrivateAssets="All"/>
     </ItemGroup>
 </Project>
