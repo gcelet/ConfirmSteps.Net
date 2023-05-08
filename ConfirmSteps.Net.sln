@@ -1,0 +1,62 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{89791510-214C-4D97-BC1A-51D9EE4A7ED1}"
+	ProjectSection(SolutionItems) = preProject
+		src\Directory.Packages.props = src\Directory.Packages.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F8A2A429-90A7-4D4B-90F8-8F2D03F81D3D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "00-solution-items", "00-solution-items", "{086782DD-E9BE-4780-A5C9-507A4CD8E717}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		CHANGELOG.md = CHANGELOG.md
+		nuget.config = nuget.config
+		package.json = package.json
+		README.md = README.md
+		commitlint.config.js = commitlint.config.js
+		Directory.Build.props = Directory.Build.props
+		Directory.Packages.props = Directory.Packages.props
+		GitVersion.yml = GitVersion.yml
+		motivation.png = motivation.png
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-nuke", "01-nuke", "{E41D98F9-CDD3-41A5-B9DB-3BE9F0C68126}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{AAD4DEA3-EF91-4647-951E-7327DD2F4E26}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConfirmSteps.Net", "src\ConfirmSteps.Net\ConfirmSteps.Net.csproj", "{11AA9456-ACA4-40B5-B14E-0D1AAD9491E1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConfirmSteps.Net.Tests", "tests\ConfirmSteps.Net.Tests\ConfirmSteps.Net.Tests.csproj", "{5054558A-3734-4A27-B961-40B67E2EB48F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AAD4DEA3-EF91-4647-951E-7327DD2F4E26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAD4DEA3-EF91-4647-951E-7327DD2F4E26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11AA9456-ACA4-40B5-B14E-0D1AAD9491E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11AA9456-ACA4-40B5-B14E-0D1AAD9491E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11AA9456-ACA4-40B5-B14E-0D1AAD9491E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11AA9456-ACA4-40B5-B14E-0D1AAD9491E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5054558A-3734-4A27-B961-40B67E2EB48F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5054558A-3734-4A27-B961-40B67E2EB48F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5054558A-3734-4A27-B961-40B67E2EB48F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5054558A-3734-4A27-B961-40B67E2EB48F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E41D98F9-CDD3-41A5-B9DB-3BE9F0C68126} = {086782DD-E9BE-4780-A5C9-507A4CD8E717}
+		{AAD4DEA3-EF91-4647-951E-7327DD2F4E26} = {E41D98F9-CDD3-41A5-B9DB-3BE9F0C68126}
+		{11AA9456-ACA4-40B5-B14E-0D1AAD9491E1} = {89791510-214C-4D97-BC1A-51D9EE4A7ED1}
+		{5054558A-3734-4A27-B961-40B67E2EB48F} = {F8A2A429-90A7-4D4B-90F8-8F2D03F81D3D}
+	EndGlobalSection
+EndGlobal

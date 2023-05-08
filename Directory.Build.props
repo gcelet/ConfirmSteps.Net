@@ -1,0 +1,28 @@
+<Project>
+    <PropertyGroup>
+        <Copyright>Copyright (c) Grégory Célet. All rights reserved.</Copyright>
+        <Authors>Grégory Célet</Authors>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/gcelet/ConfirmSteps.Net</PackageProjectUrl>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <PackageReleaseNotes>• Fixed bugs</PackageReleaseNotes>
+    </PropertyGroup>
+    <PropertyGroup>
+        <LangVersion>latest</LangVersion>
+        <LibTargetFrameworks>net7.0;net6.0;netstandard2.0</LibTargetFrameworks>
+        <TestTargetFrameworks>net7.0;net6.0</TestTargetFrameworks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <NoWarn>$(NoWarn);CS1591</NoWarn>
+    </PropertyGroup>
+    <!-- Only enable nullable feature for the supported frameworks -->
+    <PropertyGroup Condition=" '$(TargetFramework)' != 'netstandard2.0' ">
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    <!-- disable the nullable warnings when compiling for .NET Standard 2.0 -->
+    <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+        <NoWarn>$(NoWarn);nullable</NoWarn>
+    </PropertyGroup>
+</Project>
