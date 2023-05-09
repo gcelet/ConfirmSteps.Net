@@ -162,7 +162,7 @@ class Build : NukeBuild
 
     Target PackSolution => _ => _
         .Requires(() => Configuration.Equals(Configuration.Release))
-        .Produces(NuGetDirectory)
+        .Produces(NuGetDirectory / "*.nupkg", NuGetDirectory / "*.snupkg")
         .DependsOn(GenerateReports)
         .Triggers(PublishToGithub, PublishToNuGet)
         .Executes(() =>
