@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -21,24 +20,24 @@ using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
     GitHubActionsImage.UbuntuLatest,
     AutoGenerate = true,
     FetchDepth = 0,
-    OnPushBranches = new[] 
+    OnPushBranches = new[]
     {
-        "main", 
-        "dev",
+        "main",
+        "develop",
         "releases/**"
     },
-    OnPullRequestBranches = new[] 
+    OnPullRequestBranches = new[]
     {
-        "releases/**" 
+        "releases/**"
     },
     InvokedTargets = new[]
     {
         nameof(PackSolution),
     },
     EnableGitHubToken = true,
-    ImportSecrets = new[] 
-    { 
-        nameof(NuGetApiKey) 
+    ImportSecrets = new[]
+    {
+        nameof(NuGetApiKey)
     }
 )]
 class Build : NukeBuild
@@ -67,8 +66,8 @@ class Build : NukeBuild
     GitHubActions GitHubActions => GitHubActions.Instance;
 
     string GithubNugetFeed => GitHubActions != null
-         ? $"https://nuget.pkg.github.com/{GitHubActions.RepositoryOwner}/index.json"
-         : null;
+         ? $"https://nuget.pkg.github.com/{GitHubActions.RepositoryOwner??string.Empty}/index.json"
+         : string.Empty;
 
     Target RestoreTools => _ => _
         .Description("Restore tools")
@@ -177,7 +176,7 @@ class Build : NukeBuild
     Target PublishToGithub => _ => _
        .Description($"Publishing to Github for Development only.")
        .Requires(() => Configuration.Equals(Configuration.Release))
-       .OnlyWhenStatic(() => GitRepository.IsOnDevelopBranch() || GitHubActions.IsPullRequest)
+       .OnlyWhenStatic(() => GitRepository.IsOnDevelopBranch() || (GitHubActions != null && GitHubActions.IsPullRequest))
        .Executes(() =>
        {
            GlobFiles(NuGetDirectory, "*.nupkg")
@@ -191,7 +190,7 @@ class Build : NukeBuild
                    );
                });
        });
-       
+
     Target PublishToNuGet => _ => _
        .Description($"Publishing to NuGet with the version.")
        .Requires(() => Configuration.Equals(Configuration.Release))
@@ -209,7 +208,7 @@ class Build : NukeBuild
                    );
                });
        });
-       
+
     Target ContinuousIntegration => _ => _
         .DependsOn(GenerateCoverageReports);
 
