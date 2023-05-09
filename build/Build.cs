@@ -47,7 +47,7 @@ class Build : NukeBuild
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
-    [Parameter("NuGet publish url. Default is  ''")] string NuGetFeed = "";
+    [Parameter("NuGet publish url. Default is 'https://api.nuget.org/v3/index.json'")] string NuGetFeed = "https://api.nuget.org/v3/index.json";
     [Parameter("NuGet api key. Default is ''"), Secret] readonly string NuGetApiKey;
 
     [Solution] readonly Solution Solution;
