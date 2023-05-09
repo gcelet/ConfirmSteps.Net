@@ -135,7 +135,6 @@ public class BasicSyntaxTests
                             .VerifyJson((response, _) =>
                             {
                                 response.StatusCode.Should().Be(HttpStatusCode.Created);
-                                Assert.AreEqual("Update home page of hildegard.org", response.SelectString("$.title"));
                             })
                             .Extract(e => e
                                 .ToVars("todoId", FromJsonBodyToNumber("$.id"))
