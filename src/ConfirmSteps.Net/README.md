@@ -26,13 +26,15 @@ Write a sequence of steps to confirm inside a unit test with your favorite testi
     {
         // Arrange
         const string baseUrl = "{{url}}";
-        Scenario<HttpScenarioData> scenario = Scenario.New<HttpScenarioData>("Getting started with ConfirmSteps.Net")
+        Scenario<HttpScenarioData> scenario =
+            Scenario.New<HttpScenarioData>("Getting started with ConfirmSteps.Net")
                 .WithGlobals(e => e
                     .UseConst("url", "https://jsonplaceholder.typicode.com")
                     .UseObject("userId", d => d.UserId)
                 )
                 .WithSteps(s => s
-                    .HttpStep("[Step-001-User-Read]", // GET https://jsonplaceholder.typicode.com/users/1
+                    // GET https://jsonplaceholder.typicode.com/users/1
+                    .HttpStep("[Step-001-User-Read]",
                         () => RequestBuilder.Get(baseUrl).AppendPathSegments("users", "{{userId}}"),
                         step => step
                             .VerifyJson((response, _) =>
@@ -44,9 +46,12 @@ Write a sequence of steps to confirm inside a unit test with your favorite testi
                             )
                     )
                     .WaitStep(100, 200)
-                    .HttpStep("[Step-002-Todo-Add]", // POST https://jsonplaceholder.typicode.com/todos
+                    // POST https://jsonplaceholder.typicode.com/todos
+                    .HttpStep("[Step-002-Todo-Add]",
                         () => RequestBuilder.Post(baseUrl).AppendPathSegment("todos")
-                            .WithHeaders(h => h.Header(HeaderNames.ContentType, MediaTypeNames.Application.Json))
+                            .WithHeaders(h => h
+                                .Header(HeaderNames.ContentType, MediaTypeNames.Application.Json)
+                            )
                             .WithBody(
                                 """
                                 {
@@ -60,7 +65,8 @@ Write a sequence of steps to confirm inside a unit test with your favorite testi
                             .VerifyJson((response, _) =>
                             {
                                 Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
-                                Assert.AreEqual("Update home page of hildegard.org", response.SelectString("$.title"));
+                                Assert.AreEqual("Update home page of hildegard.org",
+                                    response.SelectString("$.title"));
                             })
                             .Extract(e => e
                                 .ToData(d => d.ToDoId!, FromJsonBodyToNumber("$.id"))
@@ -75,7 +81,8 @@ Write a sequence of steps to confirm inside a unit test with your favorite testi
         };
 
         // Act
-        ConfirmStepResult<HttpScenarioData> confirmResult = await scenario.ConfirmSteps(data, CancellationToken.None);
+        ConfirmStepResult<HttpScenarioData> confirmResult =
+            await scenario.ConfirmSteps(data, CancellationToken.None);
 
         // Assert
         Assert.AreEqual(ConfirmStatus.Success, confirmResult.Status);
