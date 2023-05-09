@@ -15,14 +15,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "00-solution-items", "00-sol
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
 		CHANGELOG.md = CHANGELOG.md
-		nuget.config = nuget.config
 		package.json = package.json
 		README.md = README.md
-		commitlint.config.js = commitlint.config.js
 		Directory.Build.props = Directory.Build.props
 		Directory.Packages.props = Directory.Packages.props
 		GitVersion.yml = GitVersion.yml
 		motivation.png = motivation.png
+		nuget.config = nuget.config
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-nuke", "01-nuke", "{E41D98F9-CDD3-41A5-B9DB-3BE9F0C68126}"
