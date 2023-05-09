@@ -34,6 +34,7 @@ using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
     {
         nameof(PackSolution),
     },
+    PublishArtifacts = true,
     EnableGitHubToken = true,
     ImportSecrets = new[]
     {
