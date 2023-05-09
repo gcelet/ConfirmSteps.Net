@@ -1,7 +1,4 @@
-<!-- markdownlint-disable MD033 MD041 -->
-<div align="center">
-
-<img src="motivation.png" alt="ConfirmSteps.Net" width="150px"/>
+![ConfirmSteps.Net](motivation.png)
 
 # ConfirmSteps.Net
 
@@ -9,7 +6,6 @@
 [![Coverage Status](https://coveralls.io/repos/github/gcelet/ConfirmSteps.Net/badge.svg?branch=main&kill_cache=1)](https://coveralls.io/github/gcelet/ConfirmSteps.Net?branch=main&kill_cache=1)
 
 A simple testing suite to confirm the sequence of steps
-</div>
 
 ## What is ConfirmSteps.Net
 
