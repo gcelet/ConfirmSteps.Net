@@ -54,7 +54,7 @@
         },
         "NuGetFeed": {
           "type": "string",
-          "description": "NuGet publish url. Default is  ''"
+          "description": "NuGet publish url. Default is 'https://api.nuget.org/v3/index.json'"
         },
         "Partition": {
           "type": "string",
