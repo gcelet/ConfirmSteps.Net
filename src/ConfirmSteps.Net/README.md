@@ -1,4 +1,4 @@
-![ConfirmSteps.Net](motivation.png)
+![ConfirmSteps.Net](https://raw.githubusercontent.com/gcelet/ConfirmSteps.Net/main/motivation.png)
 
 # ConfirmSteps.Net
 
