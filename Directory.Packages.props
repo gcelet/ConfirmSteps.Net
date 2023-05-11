@@ -7,7 +7,7 @@
         <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0"/>
         <PackageVersion Include="JsonCons.JsonPath" Version="1.1.0"/>
         <PackageVersion Include="AsyncFixer" Version="1.6.0"/>
-        <PackageVersion Include="Meziantou.Analyzer" Version="2.0.36"/>
+        <PackageVersion Include="Meziantou.Analyzer" Version="2.0.50"/>
         <PackageVersion Include="Roslynator.Analyzers" Version="4.2.0"/>
         <PackageVersion Include="SonarAnalyzer.CSharp" Version="8.56.0.67649"/>
     </ItemGroup>
