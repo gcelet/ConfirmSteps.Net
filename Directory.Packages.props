@@ -23,7 +23,7 @@
     </ItemGroup>
     <!-- Build dependencies -->
     <ItemGroup>
-        <PackageVersion Include="Nuke.Common" Version="7.0.0"/>
+        <PackageVersion Include="Nuke.Common" Version="7.0.2"/>
         <PackageVersion Include="docfx.console" Version="2.59.4"/>
     </ItemGroup>
     <!-- SourceLink support for all projects -->
