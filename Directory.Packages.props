@@ -9,7 +9,7 @@
         <PackageVersion Include="AsyncFixer" Version="1.6.0"/>
         <PackageVersion Include="Meziantou.Analyzer" Version="2.0.50"/>
         <PackageVersion Include="Roslynator.Analyzers" Version="4.3.0"/>
-        <PackageVersion Include="SonarAnalyzer.CSharp" Version="9.0.0.68202"/>
+        <PackageVersion Include="SonarAnalyzer.CSharp" Version="9.4.0.72892"/>
     </ItemGroup>
     <!-- Test dependencies -->
     <ItemGroup>
