@@ -81,9 +81,9 @@ class Build : NukeBuild
         .DependsOn(RestoreTools)
         .Executes(() =>
         {
-            SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
-            TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
-            EnsureCleanDirectory(BuildDirectory);
+            SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(p => p.DeleteDirectory());
+            TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(p => p.DeleteDirectory());
+            BuildDirectory.CreateOrCleanDirectory();
             DotNetClean();
         });
 
@@ -114,7 +114,7 @@ class Build : NukeBuild
         {
             IEnumerable<Project> GetProjects()
             {
-                return Solution.GetProjects("*.Tests");
+                return Solution.GetAllProjects("*.Tests");
             }
 
             IEnumerable<Project> projects = GetProjects();
@@ -180,7 +180,7 @@ class Build : NukeBuild
        .OnlyWhenStatic(() => GitRepository.IsOnDevelopBranch() || (GitHubActions != null && GitHubActions.IsPullRequest))
        .Executes(() =>
        {
-           GlobFiles(NuGetDirectory, "*.nupkg")
+           NuGetDirectory.GlobFiles("*.nupkg")
                .ForEach(x =>
                {
                    DotNetNuGetPush(s => s
@@ -198,7 +198,7 @@ class Build : NukeBuild
        .OnlyWhenStatic(() => GitRepository.IsOnMainOrMasterBranch())
        .Executes(() =>
        {
-           GlobFiles(NuGetDirectory, "*.nupkg")
+           NuGetDirectory.GlobFiles("*.nupkg")
                .ForEach(x =>
                {
                    DotNetNuGetPush(s => s
