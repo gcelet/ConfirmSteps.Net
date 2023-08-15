@@ -133,6 +133,24 @@ public class JsonDocumentProviderExtensionsTests
         }
     }
 
+    [TestCaseSource(typeof(TestCases), nameof(TestCases.TransformToObjectTestCases))]
+    public void TransformToObject_Should_Return(JsonPathTestCaseData<SampleJsonObject> testCaseData)
+    {
+        // Arrange
+        HttpResponseJson httpResponseJson = SampleJsonDocuments.BuildSample1();
+        // Act
+        SampleJsonObject? selectedObject = testCaseData.Extractor(httpResponseJson);
+        // Assert
+        if (testCaseData.ExpectedNbItems > 0)
+        {
+            selectedObject.Should().BeEquivalentTo(testCaseData.ExpectedResult);
+        }
+        else
+        {
+            selectedObject.Should().BeNull();
+        }
+    }
+
     public class JsonPathTestCaseData<T>
     {
         public int ExpectedNbItems { get; init; } = 1;
@@ -172,7 +190,7 @@ public class JsonDocumentProviderExtensionsTests
                     },
                     new JsonObject
                     {
-                        ["id"] = "L345678",
+                        ["id"] = "C901234",
                         ["status"] = "C",
                         ["amount"] = 90.12m,
                         ["quantity"] = 5678L,
@@ -211,6 +229,17 @@ public class JsonDocumentProviderExtensionsTests
 
             return jsonObject.ToHttpResponseJson();
         }
+    }
+
+    public class SampleJsonObject
+    {
+        public decimal? Amount { get; set; }
+
+        public bool? Flag { get; set; }
+
+        public string? Id { get; set; }
+
+        public string? Status { get; set; }
     }
 
     public static class TestCases
@@ -358,6 +387,23 @@ public class JsonDocumentProviderExtensionsTests
                 Extractor = jsonDocumentProvider => jsonDocumentProvider.SelectString("$.friends[0].id"),
                 ExpectedResult = "P789012",
             }).SetName("String_FromArrayItemProperty");
+        }
+
+        public static IEnumerable<TestCaseData> TransformToObjectTestCases()
+        {
+            yield return new TestCaseData(new JsonPathTestCaseData<SampleJsonObject?>
+            {
+                Extractor = jsonDocumentProvider =>
+                    jsonDocumentProvider.TransformToObject<SampleJsonObject>(
+                        "{id: id,status: status,amount: amount,flag: flag}"),
+                ExpectedResult = new SampleJsonObject
+                {
+                    Id = "P123456",
+                    Status = "P",
+                    Amount = 1234.5678m,
+                    Flag = true,
+                },
+            }).SetName("Object_When_SelectorMatchedItem");
         }
     }
 }

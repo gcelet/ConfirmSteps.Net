@@ -1,6 +1,7 @@
 ﻿namespace ConfirmSteps.Steps.Http.Rest;
 
 using System.Text.Json;
+using JsonCons.JmesPath;
 using JsonCons.JsonPath;
 
 public static class JsonDocumentProviderExtensions
@@ -29,7 +30,8 @@ public static class JsonDocumentProviderExtensions
             return null;
         }
 
-        return jsonElements?.Where(e => e is { ValueKind: JsonValueKind.True or JsonValueKind.False or JsonValueKind.Null })
+        return jsonElements?.Where(e => e is
+                { ValueKind: JsonValueKind.True or JsonValueKind.False or JsonValueKind.Null })
             .Select(e => e.ValueKind switch
             {
                 JsonValueKind.True => true,
@@ -87,6 +89,65 @@ public static class JsonDocumentProviderExtensions
         }
 
         return jsonElements?.Select(e => e.GetString()).ToArray();
+    }
+
+    public static T? TransformToAnonymousObject<T>(this IJsonDocumentProvider jsonDocumentProvider,
+        string jmesPath, T anonymousObjectInstance,
+        JsonSerializerOptions? jsonSerializerOptions = null)
+    {
+        return TransformToObject<T>(jsonDocumentProvider, jmesPath, jsonSerializerOptions);
+    }
+
+    public static T[]? TransformToAnonymousObjectArray<T>(this IJsonDocumentProvider jsonDocumentProvider,
+        string jmesPath, T anonymousObjectInstance,
+        JsonSerializerOptions? jsonSerializerOptions = null)
+    {
+        return TransformToObjectArray<T>(jsonDocumentProvider, jmesPath, jsonSerializerOptions);
+    }
+
+    public static T? TransformToObject<T>(this IJsonDocumentProvider jsonDocumentProvider, string jmesPath,
+        JsonSerializerOptions? jsonSerializerOptions = null)
+    {
+        if (jsonDocumentProvider.JsonDocument?.RootElement == null)
+        {
+            return default;
+        }
+
+        JsonDocument? jsonDocument =
+            JsonTransformer.Transform(jsonDocumentProvider.JsonDocument.RootElement, jmesPath);
+
+        if (jsonDocument == null)
+        {
+            return default;
+        }
+
+        jsonSerializerOptions ??= HttpSettings.BuildJsonSerializerOptions();
+        T? result = jsonDocument.Deserialize<T>(jsonSerializerOptions);
+
+        return result;
+    }
+
+    public static T[]? TransformToObjectArray<T>(this IJsonDocumentProvider jsonDocumentProvider, string jmesPath,
+        JsonSerializerOptions? jsonSerializerOptions = null)
+    {
+        if (jsonDocumentProvider.JsonDocument?.RootElement == null)
+        {
+            return default;
+        }
+
+        JsonTransformer jsonTransformer = JsonTransformer.Parse(jmesPath);
+        JsonDocument? jsonDocument =
+            jsonTransformer.Transform(jsonDocumentProvider.JsonDocument.RootElement);
+
+        if (jsonDocument == null)
+        {
+            return default;
+        }
+
+        jsonSerializerOptions ??= HttpSettings.BuildJsonSerializerOptions();
+        T[]? result = jsonDocument.Deserialize<T[]>(jsonSerializerOptions);
+
+        return result;
     }
 
     private static bool SelectJsonElement(this IJsonDocumentProvider jsonDocumentProvider,
