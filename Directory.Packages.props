@@ -4,7 +4,7 @@
   </PropertyGroup>
   <!-- App dependencies -->
   <ItemGroup>
-    <PackageVersion Include="FluentAssertions.Analyzers" Version="0.22.0"/>
+    <PackageVersion Include="FluentAssertions.Analyzers" Version="0.34.1"/>
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0"/>
     <PackageVersion Include="JsonCons.JsonPath" Version="1.1.0"/>
     <PackageVersion Include="AsyncFixer" Version="1.6.0"/>
