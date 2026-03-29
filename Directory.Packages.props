@@ -4,31 +4,50 @@
   </PropertyGroup>
   <!-- App dependencies -->
   <ItemGroup>
-    <PackageVersion Include="FluentAssertions.Analyzers" Version="0.22.0"/>
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0"/>
-    <PackageVersion Include="JsonCons.JsonPath" Version="1.1.0"/>
-    <PackageVersion Include="AsyncFixer" Version="1.6.0"/>
-    <PackageVersion Include="Meziantou.Analyzer" Version="2.0.82"/>
-    <PackageVersion Include="Roslynator.Analyzers" Version="4.4.0"/>
-    <PackageVersion Include="SonarAnalyzer.CSharp" Version="9.7.0.75501"/>
+    <PackageVersion Include="CSharpGuidelinesAnalyzer" Version="3.8.5" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
+    <PackageVersion Include="JsonCons.JmesPath" Version="1.0.0" />
+    <PackageVersion Include="JsonCons.JsonPath" Version="1.1.0" />
+    <PackageVersion Include="AsyncFixer" Version="1.6.0" />
+    <PackageVersion Include="Meziantou.Analyzer" Version="3.0.29" />
+    <PackageVersion Include="PolySharp" Version="1.15.0" />
+    <PackageVersion Include="Roslynator.Analyzers" Version="4.15.0" />
+    <PackageVersion Include="SonarAnalyzer.CSharp" Version="9.7.0.75501" />
+    <PackageVersion Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
   </ItemGroup>
   <!-- Test dependencies -->
   <ItemGroup>
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.7.0"/>
-    <PackageVersion Include="NUnit" Version="3.13.3"/>
-    <PackageVersion Include="NUnit3TestAdapter" Version="4.5.0"/>
-    <PackageVersion Include="NUnit.Analyzers" Version="3.6.1"/>
-    <PackageVersion Include="coverlet.collector" Version="6.0.0"/>
-    <PackageVersion Include="FluentAssertions" Version="6.11.0"/>
-    <PackageVersion Include="WireMock.Net" Version="1.5.34"/>
+    <PackageVersion Include="AwesomeAssertions.Analyzers" Version="9.0.8" />
+    <PackageVersion Include="AwesomeAssertions" Version="9.4.0" />
+    <PackageVersion Include="NUnit" Version="4.5.1" />
+    <PackageVersion Include="NUnit.Analyzers" Version="4.12.0" />
+    <PackageVersion Include="WireMock.Net" Version="2.1.0" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <PackageVersion Include="coverlet.collector" Version="6.0.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="5.2.0" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <PackageVersion Include="coverlet.collector" Version="8.0.1" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="6.2.0" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <PackageVersion Include="coverlet.collector" Version="8.0.1" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="6.2.0" />
   </ItemGroup>
   <!-- Build dependencies -->
   <ItemGroup>
-    <PackageVersion Include="Nuke.Common" Version="7.0.2"/>
-    <PackageVersion Include="docfx.console" Version="2.59.4"/>
+    <PackageVersion Include="Microsoft.Build" Version="18.4.0" />
+    <PackageVersion Include="Microsoft.Build.Tasks.Core" Version="18.4.0" />
+    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="18.4.0" />
+    <PackageVersion Include="Nuke.Common" Version="10.1.0" />
+    <PackageVersion Include="docfx.console" Version="2.59.4" />
   </ItemGroup>
   <!-- SourceLink support for all projects -->
   <ItemGroup>
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="1.1.1"/>
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.201" />
   </ItemGroup>
 </Project>
