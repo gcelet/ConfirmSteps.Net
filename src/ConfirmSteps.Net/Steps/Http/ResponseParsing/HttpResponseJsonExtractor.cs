@@ -4,15 +4,29 @@ using System.Linq.Expressions;
 using ConfirmSteps.Internal;
 using ConfirmSteps.Steps.Http.Rest;
 
+/// <summary>
+/// An HTTP response extractor that parses the response as JSON.
+/// </summary>
+/// <typeparam name="T">The type of the scenario data.</typeparam>
 public sealed class HttpResponseJsonExtractor<T> : IHttpResponseExtractor<T>
     where T : class
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="HttpResponseJsonExtractor{T}"/> class that sets a property.
+    /// </summary>
+    /// <param name="property">The property to set.</param>
+    /// <param name="extractor">The JSON extractor function.</param>
     public HttpResponseJsonExtractor(Expression<Func<T, object>> property, Func<HttpResponseJson, object?> extractor)
     {
         Setter = (stepContext, value) => SetData(property, stepContext, value);
         Extractor = extractor;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="HttpResponseJsonExtractor{T}"/> class that sets a variable.
+    /// </summary>
+    /// <param name="varsKey">The variable key.</param>
+    /// <param name="extractor">The JSON extractor function.</param>
     public HttpResponseJsonExtractor(string varsKey, Func<HttpResponseJson, object?> extractor)
     {
         Setter = (stepContext, value) => SetVars(varsKey, stepContext, value);

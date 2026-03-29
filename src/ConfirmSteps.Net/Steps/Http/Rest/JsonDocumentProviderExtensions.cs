@@ -4,8 +4,17 @@ using System.Text.Json;
 using JsonCons.JmesPath;
 using JsonCons.JsonPath;
 
+/// <summary>
+/// Provides extension methods for <see cref="IJsonDocumentProvider"/> to query JSON data using JSON path or JMESPath.
+/// </summary>
 public static class JsonDocumentProviderExtensions
 {
+    /// <summary>
+    /// Selects a boolean value from the JSON document using a JSON path.
+    /// </summary>
+    /// <param name="jsonDocumentProvider">The JSON document provider.</param>
+    /// <param name="jsonPath">The JSON path.</param>
+    /// <returns>The selected boolean value, or null if not found or not a boolean.</returns>
     public static bool? SelectBoolean(this IJsonDocumentProvider jsonDocumentProvider, string jsonPath)
     {
         if (!jsonDocumentProvider.SelectJsonElement(jsonPath, null, out JsonElement? jsonElement) ||
@@ -23,6 +32,12 @@ public static class JsonDocumentProviderExtensions
         };
     }
 
+    /// <summary>
+    /// Selects an array of boolean values from the JSON document using a JSON path.
+    /// </summary>
+    /// <param name="jsonDocumentProvider">The JSON document provider.</param>
+    /// <param name="jsonPath">The JSON path.</param>
+    /// <returns>An array of boolean values, or null if not found.</returns>
     public static bool?[]? SelectBooleanArray(this IJsonDocumentProvider jsonDocumentProvider, string jsonPath)
     {
         if (!jsonDocumentProvider.SelectJsonElements(jsonPath, null, out IList<JsonElement>? jsonElements))
@@ -41,6 +56,12 @@ public static class JsonDocumentProviderExtensions
             }).ToArray();
     }
 
+    /// <summary>
+    /// Selects a numeric value from the JSON document using a JSON path.
+    /// </summary>
+    /// <param name="jsonDocumentProvider">The JSON document provider.</param>
+    /// <param name="jsonPath">The JSON path.</param>
+    /// <returns>The selected decimal value, or null if not found or not a number.</returns>
     public static decimal? SelectNumber(this IJsonDocumentProvider jsonDocumentProvider, string jsonPath)
     {
         if (!jsonDocumentProvider.SelectJsonElement(jsonPath, JsonValueKind.Number, out JsonElement? jsonElement) ||
@@ -52,6 +73,12 @@ public static class JsonDocumentProviderExtensions
         return jsonElement.Value.GetDecimal();
     }
 
+    /// <summary>
+    /// Selects an array of numeric values from the JSON document using a JSON path.
+    /// </summary>
+    /// <param name="jsonDocumentProvider">The JSON document provider.</param>
+    /// <param name="jsonPath">The JSON path.</param>
+    /// <returns>An array of decimal values, or null if not found.</returns>
     public static decimal?[]? SelectNumberArray(this IJsonDocumentProvider jsonDocumentProvider, string jsonPath)
     {
         if (!jsonDocumentProvider.SelectJsonElements(jsonPath, null,
@@ -69,6 +96,12 @@ public static class JsonDocumentProviderExtensions
             }).ToArray();
     }
 
+    /// <summary>
+    /// Selects a string value from the JSON document using a JSON path.
+    /// </summary>
+    /// <param name="jsonDocumentProvider">The JSON document provider.</param>
+    /// <param name="jsonPath">The JSON path.</param>
+    /// <returns>The selected string value, or null if not found or not a string.</returns>
     public static string? SelectString(this IJsonDocumentProvider jsonDocumentProvider, string jsonPath)
     {
         if (!jsonDocumentProvider.SelectJsonElement(jsonPath, JsonValueKind.String, out JsonElement? jsonElement) ||
@@ -80,6 +113,12 @@ public static class JsonDocumentProviderExtensions
         return jsonElement.Value.GetString();
     }
 
+    /// <summary>
+    /// Selects an array of string values from the JSON document using a JSON path.
+    /// </summary>
+    /// <param name="jsonDocumentProvider">The JSON document provider.</param>
+    /// <param name="jsonPath">The JSON path.</param>
+    /// <returns>An array of string values, or null if not found.</returns>
     public static string?[]? SelectStringArray(this IJsonDocumentProvider jsonDocumentProvider, string jsonPath)
     {
         if (!jsonDocumentProvider.SelectJsonElements(jsonPath, JsonValueKind.String,
@@ -91,6 +130,15 @@ public static class JsonDocumentProviderExtensions
         return jsonElements?.Select(e => e.GetString()).ToArray();
     }
 
+    /// <summary>
+    /// Transforms the JSON data using JMESPath and deserializes it into an anonymous object type.
+    /// </summary>
+    /// <typeparam name="T">The type of the anonymous object.</typeparam>
+    /// <param name="jsonDocumentProvider">The JSON document provider.</param>
+    /// <param name="jmesPath">The JMESPath expression.</param>
+    /// <param name="anonymousObjectInstance">An instance of the anonymous object to determine the type.</param>
+    /// <param name="jsonSerializerOptions">The JSON serializer options.</param>
+    /// <returns>The deserialized object, or null if transformation failed.</returns>
     public static T? TransformToAnonymousObject<T>(this IJsonDocumentProvider jsonDocumentProvider,
         string jmesPath, T anonymousObjectInstance,
         JsonSerializerOptions? jsonSerializerOptions = null)
@@ -98,6 +146,15 @@ public static class JsonDocumentProviderExtensions
         return TransformToObject<T>(jsonDocumentProvider, jmesPath, jsonSerializerOptions);
     }
 
+    /// <summary>
+    /// Transforms the JSON data using JMESPath and deserializes it into an array of anonymous objects.
+    /// </summary>
+    /// <typeparam name="T">The type of the anonymous object.</typeparam>
+    /// <param name="jsonDocumentProvider">The JSON document provider.</param>
+    /// <param name="jmesPath">The JMESPath expression.</param>
+    /// <param name="anonymousObjectInstance">An instance of the anonymous object to determine the type.</param>
+    /// <param name="jsonSerializerOptions">The JSON serializer options.</param>
+    /// <returns>An array of deserialized objects, or null if transformation failed.</returns>
     public static T[]? TransformToAnonymousObjectArray<T>(this IJsonDocumentProvider jsonDocumentProvider,
         string jmesPath, T anonymousObjectInstance,
         JsonSerializerOptions? jsonSerializerOptions = null)
@@ -105,6 +162,14 @@ public static class JsonDocumentProviderExtensions
         return TransformToObjectArray<T>(jsonDocumentProvider, jmesPath, jsonSerializerOptions);
     }
 
+    /// <summary>
+    /// Transforms the JSON data using JMESPath and deserializes it into the specified type.
+    /// </summary>
+    /// <typeparam name="T">The type to deserialize into.</typeparam>
+    /// <param name="jsonDocumentProvider">The JSON document provider.</param>
+    /// <param name="jmesPath">The JMESPath expression.</param>
+    /// <param name="jsonSerializerOptions">The JSON serializer options.</param>
+    /// <returns>The deserialized object, or default value of T if transformation failed.</returns>
     public static T? TransformToObject<T>(this IJsonDocumentProvider jsonDocumentProvider, string jmesPath,
         JsonSerializerOptions? jsonSerializerOptions = null)
     {
@@ -127,6 +192,14 @@ public static class JsonDocumentProviderExtensions
         return result;
     }
 
+    /// <summary>
+    /// Transforms the JSON data using JMESPath and deserializes it into an array of the specified type.
+    /// </summary>
+    /// <typeparam name="T">The type of elements in the array.</typeparam>
+    /// <param name="jsonDocumentProvider">The JSON document provider.</param>
+    /// <param name="jmesPath">The JMESPath expression.</param>
+    /// <param name="jsonSerializerOptions">The JSON serializer options.</param>
+    /// <returns>An array of deserialized objects, or default value of T[] if transformation failed.</returns>
     public static T[]? TransformToObjectArray<T>(this IJsonDocumentProvider jsonDocumentProvider, string jmesPath,
         JsonSerializerOptions? jsonSerializerOptions = null)
     {

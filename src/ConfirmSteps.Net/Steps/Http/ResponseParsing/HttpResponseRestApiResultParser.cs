@@ -4,8 +4,16 @@ using System.Text.Json;
 using ConfirmSteps.Steps.Http.Problems;
 using ConfirmSteps.Steps.Http.Rest;
 
+/// <summary>
+/// Default implementation of <see cref="IHttpResponseRestApiResultParser"/>.
+/// </summary>
 public class HttpResponseRestApiResultParser : IHttpResponseRestApiResultParser
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="HttpResponseRestApiResultParser"/> class.
+    /// </summary>
+    /// <param name="options">The JSON serializer options.</param>
+    /// <param name="httpResponseJsonParser">The JSON parser.</param>
     public HttpResponseRestApiResultParser(JsonSerializerOptions options, IHttpResponseJsonParser httpResponseJsonParser)
     {
         Options = options;

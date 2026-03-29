@@ -3,8 +3,15 @@
 using System.Text.Json;
 using ConfirmSteps.Steps.Http.Rest;
 
+/// <summary>
+/// Default implementation of <see cref="IHttpResponseJsonParser"/> using <see cref="JsonSerializer"/>.
+/// </summary>
 public class HttpResponseJsonParser : IHttpResponseJsonParser
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="HttpResponseJsonParser"/> class.
+    /// </summary>
+    /// <param name="options">The JSON serializer options.</param>
     public HttpResponseJsonParser(JsonSerializerOptions options)
     {
         Options = options;

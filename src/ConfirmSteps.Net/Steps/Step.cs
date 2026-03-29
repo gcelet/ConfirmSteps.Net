@@ -1,8 +1,19 @@
 ﻿namespace ConfirmSteps.Steps;
 
+/// <summary>
+/// Provides a base implementation for a step in a scenario, managing the lifecycle phases: Prepare, Execute, Verify, and Extract.
+/// </summary>
+/// <typeparam name="T">The type of the data object the scenario operates on.</typeparam>
 public abstract class Step<T> : IStep<T>
     where T : class
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Step{T}"/> class.
+    /// </summary>
+    /// <param name="stepPreparer">The preparer for the step.</param>
+    /// <param name="stepExecutor">The executor for the step.</param>
+    /// <param name="stepVerifier">The verifier for the step.</param>
+    /// <param name="stepExtractor">The extractor for the step.</param>
     protected Step(IStepPreparer<T> stepPreparer, IStepExecutor<T> stepExecutor,
         IStepVerifier<T> stepVerifier, IStepExtractor<T> stepExtractor)
     {
@@ -12,10 +23,19 @@ public abstract class Step<T> : IStep<T>
         StepExtractor = stepExtractor;
     }
 
+    /// <summary>
+    /// Gets a no-op step extractor.
+    /// </summary>
     protected static IStepExtractor<T> NullStepExtractor { get; } = new NoOpStepExtractor();
 
+    /// <summary>
+    /// Gets a no-op step preparer.
+    /// </summary>
     protected static IStepPreparer<T> NullStepPreparer { get; } = new NoOpStepPreparer();
 
+    /// <summary>
+    /// Gets a no-op step verifier.
+    /// </summary>
     protected static IStepVerifier<T> NullStepVerifier { get; } = new NoOpStepVerifier();
 
     private IStepExecutor<T> StepExecutor { get; }
@@ -111,6 +131,12 @@ public abstract class Step<T> : IStep<T>
         return stepResult;
     }
 
+    /// <summary>
+    /// Executes the core logic of the step.
+    /// </summary>
+    /// <param name="stepContext">The context for the step execution.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the execution.</param>
+    /// <returns>The <see cref="ConfirmStatus"/> resulting from the execution.</returns>
     protected virtual async Task<ConfirmStatus> Execute(StepContext<T> stepContext, CancellationToken cancellationToken)
     {
         ConfirmStatus status = await StepExecutor.ExecuteStep(stepContext, cancellationToken);
@@ -118,6 +144,12 @@ public abstract class Step<T> : IStep<T>
         return status;
     }
 
+    /// <summary>
+    /// Executes the extraction phase of the step.
+    /// </summary>
+    /// <param name="stepContext">The context for the step execution.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the execution.</param>
+    /// <returns>The <see cref="ConfirmStatus"/> resulting from the extraction.</returns>
     protected virtual async Task<ConfirmStatus> Extract(StepContext<T> stepContext, CancellationToken cancellationToken)
     {
         ConfirmStatus status = await StepExtractor.ExtractStep(stepContext, cancellationToken);
@@ -125,6 +157,12 @@ public abstract class Step<T> : IStep<T>
         return status;
     }
 
+    /// <summary>
+    /// Executes the preparation phase of the step.
+    /// </summary>
+    /// <param name="stepContext">The context for the step execution.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the execution.</param>
+    /// <returns>The <see cref="ConfirmStatus"/> resulting from the preparation.</returns>
     protected virtual async Task<ConfirmStatus> Prepare(StepContext<T> stepContext, CancellationToken cancellationToken)
     {
         ConfirmStatus status = await StepPreparer.PrepareStep(stepContext, cancellationToken);
@@ -132,6 +170,12 @@ public abstract class Step<T> : IStep<T>
         return status;
     }
 
+    /// <summary>
+    /// Executes the verification phase of the step.
+    /// </summary>
+    /// <param name="stepContext">The context for the step execution.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the execution.</param>
+    /// <returns>The <see cref="ConfirmStatus"/> resulting from the verification.</returns>
     protected virtual async Task<ConfirmStatus> Verify(StepContext<T> stepContext, CancellationToken cancellationToken)
     {
         ConfirmStatus status = await StepVerifier.VerifyStep(stepContext, cancellationToken);

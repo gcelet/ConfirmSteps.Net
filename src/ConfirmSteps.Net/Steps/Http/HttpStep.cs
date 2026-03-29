@@ -4,9 +4,19 @@ using ConfirmSteps.Steps.Http.RequestBuilding;
 using ConfirmSteps.Steps.Http.ResponseParsing;
 using Microsoft.Extensions.DependencyInjection;
 
+/// <summary>
+/// Represents a step that performs an HTTP request and verifies the response.
+/// </summary>
+/// <typeparam name="T">The type of the custom data context.</typeparam>
 public sealed class HttpStep<T> : Step<T>
     where T : class
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="HttpStep{T}"/> class.
+    /// </summary>
+    /// <param name="requestBuilder">The builder used to construct the HTTP request.</param>
+    /// <param name="verifyResponse">A delegate that verifies the HTTP response message.</param>
+    /// <param name="extractors">A list of extractors to pull data from the HTTP response.</param>
     public HttpStep(RequestBuilder requestBuilder,
         Func<HttpResponseMessage, StepContext<T>, CancellationToken, Task> verifyResponse,
         IReadOnlyList<IHttpResponseExtractor<T>> extractors)
