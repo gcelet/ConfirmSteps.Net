@@ -1,12 +1,10 @@
 namespace ConfirmSteps.Net.Tests;
 
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Mime;
 using ConfirmSteps.Steps.Http.RequestBuilding;
 using ConfirmSteps.Steps.Http.Rest;
-using FluentAssertions;
-using Microsoft.AspNetCore.Mvc;
+using AwesomeAssertions;
 using Microsoft.Net.Http.Headers;
 using static CancellationExtensions;
 using static ConfirmSteps.Steps.Http.ResponseParsing.HttpResponseExtractors;

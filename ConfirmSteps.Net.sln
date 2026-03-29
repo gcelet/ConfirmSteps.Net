@@ -4,33 +4,37 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{89791510-214C-4D97-BC1A-51D9EE4A7ED1}"
-	ProjectSection(SolutionItems) = preProject
-		src\Directory.Packages.props = src\Directory.Packages.props
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F8A2A429-90A7-4D4B-90F8-8F2D03F81D3D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "00-solution-items", "00-solution-items", "{086782DD-E9BE-4780-A5C9-507A4CD8E717}"
-	ProjectSection(SolutionItems) = preProject
-		.editorconfig = .editorconfig
-		.gitignore = .gitignore
-		CHANGELOG.md = CHANGELOG.md
-		package.json = package.json
-		README.md = README.md
-		Directory.Build.props = Directory.Build.props
-		Directory.Packages.props = Directory.Packages.props
-		GitVersion.yml = GitVersion.yml
-		motivation.png = motivation.png
-		nuget.config = nuget.config
-	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-nuke", "01-nuke", "{E41D98F9-CDD3-41A5-B9DB-3BE9F0C68126}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-build", "01-build", "{E41D98F9-CDD3-41A5-B9DB-3BE9F0C68126}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\continuous.yml = .github\workflows\continuous.yml
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{AAD4DEA3-EF91-4647-951E-7327DD2F4E26}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConfirmSteps.Net", "src\ConfirmSteps.Net\ConfirmSteps.Net.csproj", "{11AA9456-ACA4-40B5-B14E-0D1AAD9491E1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConfirmSteps.Net.Tests", "tests\ConfirmSteps.Net.Tests\ConfirmSteps.Net.Tests.csproj", "{5054558A-3734-4A27-B961-40B67E2EB48F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02-files", "02-files", "{7BE984F4-757D-4ADF-A056-5F76B47DEED8}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		CHANGELOG.md = CHANGELOG.md
+		Directory.Build.props = Directory.Build.props
+		Directory.Packages.props = Directory.Packages.props
+		GitVersion.yml = GitVersion.yml
+		motivation.png = motivation.png
+		nuget.config = nuget.config
+		package.json = package.json
+		.config\dotnet-tools.json = .config\dotnet-tools.json
+		global.json = global.json
+		PackageReadme.md = PackageReadme.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,5 +61,6 @@ Global
 		{AAD4DEA3-EF91-4647-951E-7327DD2F4E26} = {E41D98F9-CDD3-41A5-B9DB-3BE9F0C68126}
 		{11AA9456-ACA4-40B5-B14E-0D1AAD9491E1} = {89791510-214C-4D97-BC1A-51D9EE4A7ED1}
 		{5054558A-3734-4A27-B961-40B67E2EB48F} = {F8A2A429-90A7-4D4B-90F8-8F2D03F81D3D}
+		{7BE984F4-757D-4ADF-A056-5F76B47DEED8} = {086782DD-E9BE-4780-A5C9-507A4CD8E717}
 	EndGlobalSection
 EndGlobal

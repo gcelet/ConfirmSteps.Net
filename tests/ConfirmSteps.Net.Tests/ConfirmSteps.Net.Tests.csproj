@@ -1,27 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
-        <IsPackable>false</IsPackable>
-        <IsTestProject>true</IsTestProject>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;net8.0;net10.0</TargetFrameworks>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="FluentAssertions.Analyzers">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" />
-        <PackageReference Include="NUnit" />
-        <PackageReference Include="NUnit3TestAdapter" />
-        <PackageReference Include="NUnit.Analyzers" />
-        <PackageReference Include="coverlet.collector" />
-        <PackageReference Include="FluentAssertions" />
-        <PackageReference Include="WireMock.Net" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="AwesomeAssertions"/>
+    <PackageReference Include="AwesomeAssertions.Analyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="coverlet.collector"/>
+    <PackageReference Include="Microsoft.NET.Test.Sdk"/>
+    <PackageReference Include="NUnit"/>
+    <PackageReference Include="NUnit.Analyzers"/>
+    <PackageReference Include="NUnit3TestAdapter"/>
+    <PackageReference Include="WireMock.Net"/>
+  </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\..\src\ConfirmSteps.Net\ConfirmSteps.Net.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ConfirmSteps.Net\ConfirmSteps.Net.csproj"/>
+  </ItemGroup>
 
 </Project>

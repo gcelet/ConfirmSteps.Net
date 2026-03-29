@@ -2,7 +2,7 @@ namespace ConfirmSteps.Net.Tests.Http.Rest;
 
 using System.Text.Json.Nodes;
 using ConfirmSteps.Steps.Http.Rest;
-using FluentAssertions;
+using AwesomeAssertions;
 
 [TestFixture]
 public class JsonDocumentProviderExtensionsTests
