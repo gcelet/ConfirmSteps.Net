@@ -4,8 +4,17 @@ using ConfirmSteps.Data;
 using ConfirmSteps.Steps;
 using Microsoft.Extensions.DependencyInjection;
 
+/// <summary>
+/// Provides a static entry point to create new scenarios.
+/// </summary>
 public static class Scenario
 {
+    /// <summary>
+    /// Starts the creation of a new scenario.
+    /// </summary>
+    /// <typeparam name="T">The type of the data object the scenario operates on.</typeparam>
+    /// <param name="title">The title of the scenario.</param>
+    /// <returns>An <see cref="IScenarioCustomizer{T}"/> to configure the scenario.</returns>
     public static IScenarioCustomizer<T> New<T>(string title)
         where T : class
     {
@@ -13,9 +22,19 @@ public static class Scenario
     }
 }
 
+/// <summary>
+/// Represents a scenario consisting of multiple steps to be executed.
+/// </summary>
+/// <typeparam name="T">The type of the data object being processed.</typeparam>
 public sealed class Scenario<T>
     where T : class
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Scenario{T}"/> class.
+    /// </summary>
+    /// <param name="title">The title of the scenario.</param>
+    /// <param name="steps">The list of steps to execute.</param>
+    /// <param name="services">The service provider for dependency injection.</param>
     public Scenario(string title, IReadOnlyList<IStep<T>> steps, IServiceProvider services)
     {
         Title = title;
@@ -23,12 +42,21 @@ public sealed class Scenario<T>
         Services = services;
     }
 
+    /// <summary>
+    /// Gets the title of the scenario.
+    /// </summary>
     public string Title { get; }
 
     private IServiceProvider Services { get; }
 
     private IReadOnlyList<IStep<T>> Steps { get; }
 
+    /// <summary>
+    /// Executes the scenario with the provided data.
+    /// </summary>
+    /// <param name="data">The initial data object.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the execution.</param>
+    /// <returns>A <see cref="ConfirmStepResult{T}"/> containing the results of the execution.</returns>
     public async Task<ConfirmStepResult<T>> ConfirmSteps(T data, CancellationToken cancellationToken)
     {
         int nbSteps = Steps.Count;

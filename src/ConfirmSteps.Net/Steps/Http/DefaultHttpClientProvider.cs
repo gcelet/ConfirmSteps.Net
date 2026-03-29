@@ -2,6 +2,9 @@
 
 using System.Net;
 
+/// <summary>
+/// Provides a default implementation of <see cref="IHttpClientProvider"/> and <see cref="ICookieContainerProvider"/>.
+/// </summary>
 public sealed class DefaultHttpClientProvider : IHttpClientProvider, ICookieContainerProvider
 {
     private readonly object lockObject = new();

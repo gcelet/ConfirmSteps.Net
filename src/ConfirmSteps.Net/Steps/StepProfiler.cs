@@ -2,12 +2,23 @@ namespace ConfirmSteps.Steps;
 
 using System.Diagnostics;
 
+/// <summary>
+/// Provides profiling capabilities for steps, measuring the time spent in different sections.
+/// </summary>
 public sealed class StepProfiler
 {
     private readonly List<StepSectionStat> _stats = new();
 
+    /// <summary>
+    /// Gets the collected profiling statistics.
+    /// </summary>
     public IReadOnlyList<StepSectionStat> Stats => _stats.AsReadOnly();
 
+    /// <summary>
+    /// Starts profiling a section with the specified name.
+    /// </summary>
+    /// <param name="sectionName">The name of the section to profile.</param>
+    /// <returns>An <see cref="IDisposable"/> that stops profiling when disposed.</returns>
     public IDisposable Profile(string sectionName)
     {
         return new StepSectionProfiler(sectionName, this);
@@ -22,11 +33,20 @@ public sealed class StepProfiler
         });
     }
 
+    /// <summary>
+    /// Represents the profiling statistics for a single section.
+    /// </summary>
     public sealed class StepSectionStat
     {
+        /// <summary>
+        /// Gets the time elapsed during the section's execution.
+        /// </summary>
         public TimeSpan Elapsed { get; init; }
 
-        public string SectionName { get; init; } = String.Empty;
+        /// <summary>
+        /// Gets the name of the profiled section.
+        /// </summary>
+        public string SectionName { get; init; } = string.Empty;
     }
 
     private class StepSectionProfiler : IDisposable

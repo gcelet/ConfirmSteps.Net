@@ -3,9 +3,18 @@
 using System.Linq.Expressions;
 using ConfirmSteps.Internal;
 
+/// <summary>
+/// An HTTP response extractor that extracts data directly from the <see cref="HttpResponseMessage"/>.
+/// </summary>
+/// <typeparam name="T">The type of the scenario data.</typeparam>
 public sealed class HttpResponseMessageExtractor<T> : IHttpResponseExtractor<T>
     where T : class
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="HttpResponseMessageExtractor{T}"/> class that sets a property.
+    /// </summary>
+    /// <param name="property">The property to set.</param>
+    /// <param name="extractor">The extractor function.</param>
     public HttpResponseMessageExtractor(Expression<Func<T, object>> property,
         Func<HttpResponseMessage, object?> extractor)
     {
@@ -13,6 +22,11 @@ public sealed class HttpResponseMessageExtractor<T> : IHttpResponseExtractor<T>
         Extractor = extractor;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="HttpResponseMessageExtractor{T}"/> class that sets a variable.
+    /// </summary>
+    /// <param name="varsKey">The variable key.</param>
+    /// <param name="extractor">The extractor function.</param>
     public HttpResponseMessageExtractor(string varsKey, Func<HttpResponseMessage, object?> extractor)
     {
         Setter = (stepContext, value) => SetVars(varsKey, stepContext, value);

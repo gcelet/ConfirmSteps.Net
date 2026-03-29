@@ -3,12 +3,21 @@
 using ConfirmSteps.Internal;
 using Microsoft.Extensions.DependencyInjection;
 
+/// <summary>
+/// Provides a builder for creating a code-based step.
+/// </summary>
+/// <typeparam name="T">The type of the data object the scenario operates on.</typeparam>
 public sealed class CodeStepBuilder<T> : IStepBuilder<T>
     where T : class
 {
     private Func<StepContext<T>, CancellationToken, Task<ConfirmStatus>> ExecuteFunc { get; set; } =
         (_, _) => Task.FromResult(ConfirmStatus.Indecisive);
 
+    /// <summary>
+    /// Configures the asynchronous execution logic for the step.
+    /// </summary>
+    /// <param name="execute">The function to execute.</param>
+    /// <returns>The current <see cref="CodeStepBuilder{T}"/> for fluent chaining.</returns>
     public CodeStepBuilder<T> Execute(Func<StepContext<T>, CancellationToken, Task<ConfirmStatus>> execute)
     {
         ExecuteFunc = execute;
@@ -16,6 +25,11 @@ public sealed class CodeStepBuilder<T> : IStepBuilder<T>
         return this;
     }
 
+    /// <summary>
+    /// Configures the synchronous execution logic for the step.
+    /// </summary>
+    /// <param name="execute">The function to execute.</param>
+    /// <returns>The current <see cref="CodeStepBuilder{T}"/> for fluent chaining.</returns>
     public CodeStepBuilder<T> Execute(Func<StepContext<T>, ConfirmStatus> execute)
     {
         ExecuteFunc = (c, _) =>
