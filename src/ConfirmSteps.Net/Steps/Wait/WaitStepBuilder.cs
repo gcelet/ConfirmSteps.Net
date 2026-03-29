@@ -23,7 +23,7 @@ public class WaitStepBuilder<T> : IStepBuilder<T>
     /// <inheritdoc />
     IServiceCollection IStepBuilder<T>.RegisterServices(IServiceCollection services)
     {
-        services.TryAddSingleton<Random>(sp => new Random());
+        services.TryAddSingleton(new Random());
         return services;
     }
 }

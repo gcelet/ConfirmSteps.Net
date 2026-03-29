@@ -14,7 +14,6 @@ public abstract class HttpStepTestBase
     {
         WireMockServerSettings settings = new()
         {
-            Port = 54321,
             Logger = new WireMockConsoleLogger(),
         };
 

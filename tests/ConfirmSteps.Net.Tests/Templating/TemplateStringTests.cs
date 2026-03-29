@@ -1,7 +1,7 @@
 ﻿namespace ConfirmSteps.Net.Tests.Templating;
 
 using ConfirmSteps.Templating;
-using FluentAssertions;
+using AwesomeAssertions;
 
 [TestFixture]
 public class TemplateStringTests

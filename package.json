@@ -2,8 +2,8 @@
   "name": "nuget-library-template",
   "version": "1.0.0",
   "devDependencies": {
-    "@commitlint/cli": "^17.6.1",
-    "@commitlint/config-conventional": "^17.6.1",
-    "markdownlint-cli2": "^0.8.0"
+    "@commitlint/cli": "^20.5.0",
+    "@commitlint/config-conventional": "^20.5.0",
+    "markdownlint-cli2": "^0.21.0"
   }
 }

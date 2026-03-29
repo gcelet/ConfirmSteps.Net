@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 using ConfirmSteps.Steps.Http;
 using ConfirmSteps.Steps.Http.Problems;
 using ConfirmSteps.Steps.Http.RequestBuilding;
-using FluentAssertions;
+using AwesomeAssertions;
 using static CancellationExtensions;
 
 [TestFixture]
@@ -16,7 +16,7 @@ public class HttpStepTests : HttpStepTestBase
         yield return new TestCaseData(new VerifyTestCaseData
         {
             ServerShouldReturnProblem = false,
-            Verify = step => step.Verify((response, _) => { response.Should().HaveStatusCode(HttpStatusCode.OK); })
+            Verify = step => step.Verify((response, _) => { response.StatusCode.Should().Be(HttpStatusCode.OK); })
         }).SetName("Verify_Sync_NoProblem");
         yield return new TestCaseData(new VerifyTestCaseData
         {
@@ -24,13 +24,13 @@ public class HttpStepTests : HttpStepTestBase
             Verify = step => step.Verify(async (response, _, ct) =>
             {
                 await Task.Delay(10, ct);
-                response.Should().HaveStatusCode(HttpStatusCode.OK);
+                response.StatusCode.Should().Be(HttpStatusCode.OK);
             })
         }).SetName("Verify_Async_NoProblem");
         yield return new TestCaseData(new VerifyTestCaseData
         {
             ServerShouldReturnProblem = true,
-            Verify = step => step.Verify((response, _) => { response.Should().HaveStatusCode(HttpStatusCode.NotFound); })
+            Verify = step => step.Verify((response, _) => { response.StatusCode.Should().Be(HttpStatusCode.NotFound); })
         }).SetName("Verify_Sync_Problem");
         yield return new TestCaseData(new VerifyTestCaseData
         {
@@ -38,7 +38,7 @@ public class HttpStepTests : HttpStepTestBase
             Verify = step => step.Verify(async (response, _, ct) =>
             {
                 await Task.Delay(10, ct);
-                response.Should().HaveStatusCode(HttpStatusCode.NotFound);
+                response.StatusCode.Should().Be(HttpStatusCode.NotFound);
             })
         }).SetName("Verify_Async_Problem");
 

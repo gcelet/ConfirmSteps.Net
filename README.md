@@ -109,6 +109,6 @@ If you're still running into problems, file an issue above.
 
 ### License, etc.
 
-ConfirmSteps.Net is Copyright &copy; 2023 Grégory Célet and other contributors under the [MIT license](LICENSE).
+ConfirmSteps.Net is Copyright &copy; 2023-2026 Grégory Célet and other contributors under the [MIT license](LICENSE).
 
 [Motivation icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/motivation "motivation icons")
