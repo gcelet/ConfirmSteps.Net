@@ -5,9 +5,17 @@ using ConfirmSteps.Internal;
 using ConfirmSteps.Steps;
 using Microsoft.Extensions.DependencyInjection;
 
+/// <summary>
+/// Implements the builder and customizer for a scenario.
+/// </summary>
+/// <typeparam name="T">The type of the data object the scenario operates on.</typeparam>
 public sealed class ScenarioBuilder<T> : IScenarioCustomizer<T>, IScenarioBuilder<T>, IStepBuilderAppender<T>
     where T : class
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ScenarioBuilder{T}"/> class.
+    /// </summary>
+    /// <param name="title">The title of the scenario.</param>
     public ScenarioBuilder(string title)
     {
         Title = title;

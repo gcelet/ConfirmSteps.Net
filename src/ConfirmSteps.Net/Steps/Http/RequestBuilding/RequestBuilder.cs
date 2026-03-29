@@ -5,6 +5,9 @@ using System.Text;
 using System.Web;
 using ConfirmSteps.Templating;
 
+/// <summary>
+/// Provides a fluent builder for constructing HTTP requests.
+/// </summary>
 public sealed class RequestBuilder : IHttpRequestMessageConverter
 {
     private RequestBuilder(HttpMethod method, TemplateString? baseUrl = null)
@@ -13,41 +16,81 @@ public sealed class RequestBuilder : IHttpRequestMessageConverter
         BaseUrl = baseUrl;
     }
 
+    /// <summary>
+    /// Creates a builder for a DELETE request.
+    /// </summary>
+    /// <param name="baseUrl">The base URL for the request.</param>
+    /// <returns>A new <see cref="RequestBuilder"/> instance.</returns>
     public static RequestBuilder Delete(TemplateString? baseUrl = null)
     {
         return new RequestBuilder(HttpMethod.Delete, baseUrl);
     }
 
+    /// <summary>
+    /// Creates a builder for a GET request.
+    /// </summary>
+    /// <param name="baseUrl">The base URL for the request.</param>
+    /// <returns>A new <see cref="RequestBuilder"/> instance.</returns>
     public static RequestBuilder Get(TemplateString? baseUrl = null)
     {
         return new RequestBuilder(HttpMethod.Get, baseUrl);
     }
 
+    /// <summary>
+    /// Creates a builder for a HEAD request.
+    /// </summary>
+    /// <param name="baseUrl">The base URL for the request.</param>
+    /// <returns>A new <see cref="RequestBuilder"/> instance.</returns>
     public static RequestBuilder Head(TemplateString? baseUrl = null)
     {
         return new RequestBuilder(HttpMethod.Head, baseUrl);
     }
 
+    /// <summary>
+    /// Creates a builder for an OPTIONS request.
+    /// </summary>
+    /// <param name="baseUrl">The base URL for the request.</param>
+    /// <returns>A new <see cref="RequestBuilder"/> instance.</returns>
     public static RequestBuilder Options(TemplateString? baseUrl = null)
     {
         return new RequestBuilder(HttpMethod.Options, baseUrl);
     }
 
+    /// <summary>
+    /// Creates a builder for a PATCH request.
+    /// </summary>
+    /// <param name="baseUrl">The base URL for the request.</param>
+    /// <returns>A new <see cref="RequestBuilder"/> instance.</returns>
     public static RequestBuilder Patch(TemplateString? baseUrl = null)
     {
         return new RequestBuilder(HttpMethod.Patch, baseUrl);
     }
 
+    /// <summary>
+    /// Creates a builder for a POST request.
+    /// </summary>
+    /// <param name="baseUrl">The base URL for the request.</param>
+    /// <returns>A new <see cref="RequestBuilder"/> instance.</returns>
     public static RequestBuilder Post(TemplateString? baseUrl = null)
     {
         return new RequestBuilder(HttpMethod.Post, baseUrl);
     }
 
+    /// <summary>
+    /// Creates a builder for a PUT request.
+    /// </summary>
+    /// <param name="baseUrl">The base URL for the request.</param>
+    /// <returns>A new <see cref="RequestBuilder"/> instance.</returns>
     public static RequestBuilder Put(TemplateString? baseUrl = null)
     {
         return new RequestBuilder(HttpMethod.Put, baseUrl);
     }
 
+    /// <summary>
+    /// Creates a builder for a TRACE request.
+    /// </summary>
+    /// <param name="baseUrl">The base URL for the request.</param>
+    /// <returns>A new <see cref="RequestBuilder"/> instance.</returns>
     public static RequestBuilder Trace(TemplateString? baseUrl = null)
     {
         return new RequestBuilder(HttpMethod.Trace, baseUrl);
@@ -67,6 +110,11 @@ public sealed class RequestBuilder : IHttpRequestMessageConverter
 
     private List<KeyValuePair<TemplateString, TemplateString>> QueryString { get; } = new();
 
+    /// <summary>
+    /// Appends a path segment to the request URI.
+    /// </summary>
+    /// <param name="pathSegment">The path segment to append.</param>
+    /// <returns>The current <see cref="RequestBuilder"/> for fluent chaining.</returns>
     public RequestBuilder AppendPathSegment(TemplateString pathSegment)
     {
         PathSegments.Add(pathSegment);
@@ -74,6 +122,11 @@ public sealed class RequestBuilder : IHttpRequestMessageConverter
         return this;
     }
 
+    /// <summary>
+    /// Appends multiple path segments to the request URI.
+    /// </summary>
+    /// <param name="pathSegments">The path segments to append.</param>
+    /// <returns>The current <see cref="RequestBuilder"/> for fluent chaining.</returns>
     public RequestBuilder AppendPathSegments(params TemplateString[] pathSegments)
     {
         if (pathSegments.Length > 0)
@@ -84,12 +137,22 @@ public sealed class RequestBuilder : IHttpRequestMessageConverter
         return this;
     }
 
+    /// <summary>
+    /// Sets the body of the request.
+    /// </summary>
+    /// <param name="body">The template string for the body.</param>
+    /// <returns>The current <see cref="RequestBuilder"/> for fluent chaining.</returns>
     public RequestBuilder WithBody(TemplateString body)
     {
         Body = body;
         return this;
     }
 
+    /// <summary>
+    /// Sets the body of the request from a file.
+    /// </summary>
+    /// <param name="path">The path to the file containing the body.</param>
+    /// <returns>The current <see cref="RequestBuilder"/> for fluent chaining.</returns>
     public RequestBuilder WithBodyFile(string path)
     {
         TemplateString body = TemplateString.LoadFromFile(path);
@@ -97,6 +160,11 @@ public sealed class RequestBuilder : IHttpRequestMessageConverter
         return WithBody(body);
     }
 
+    /// <summary>
+    /// Configures headers for the request.
+    /// </summary>
+    /// <param name="headers">A delegate to configure the headers.</param>
+    /// <returns>The current <see cref="RequestBuilder"/> for fluent chaining.</returns>
     public RequestBuilder WithHeaders(Action<HeaderBuilder> headers)
     {
         HeaderBuilder builder = new();
@@ -114,6 +182,11 @@ public sealed class RequestBuilder : IHttpRequestMessageConverter
         return this;
     }
 
+    /// <summary>
+    /// Configures the query string for the request.
+    /// </summary>
+    /// <param name="queryStringParameters">A delegate to configure the query string.</param>
+    /// <returns>The current <see cref="RequestBuilder"/> for fluent chaining.</returns>
     public RequestBuilder WithQueryString(Action<QueryStringBuilder> queryStringParameters)
     {
         QueryStringBuilder builder = new();

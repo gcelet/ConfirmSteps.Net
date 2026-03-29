@@ -1,5 +1,9 @@
 ﻿namespace ConfirmSteps.Data;
 
+/// <summary>
+/// Provides a value extracted from the scenario data for a variable.
+/// </summary>
+/// <typeparam name="T">The type of the scenario data.</typeparam>
 public sealed class ObjectVarProvider<T> : VarProvider<T>
     where T : class
 {
