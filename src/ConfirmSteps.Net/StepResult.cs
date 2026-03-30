@@ -25,5 +25,5 @@ public sealed class StepResult<T>
     /// <summary>
     /// Gets or sets the variables collected or modified during step execution.
     /// </summary>
-    public IReadOnlyDictionary<string, object> Vars { get; set; } = new Dictionary<string, object>();
+    public IReadOnlyDictionary<string, object> Vars { get; set; } = new Dictionary<string, object>(StringComparer.Ordinal);
 }

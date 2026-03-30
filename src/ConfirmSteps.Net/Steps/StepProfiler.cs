@@ -7,12 +7,12 @@ using System.Diagnostics;
 /// </summary>
 public sealed class StepProfiler
 {
-    private readonly List<StepSectionStat> _stats = new();
+    private readonly List<StepSectionStat> stats = new();
 
     /// <summary>
     /// Gets the collected profiling statistics.
     /// </summary>
-    public IReadOnlyList<StepSectionStat> Stats => _stats.AsReadOnly();
+    public IReadOnlyList<StepSectionStat> Stats => stats.AsReadOnly();
 
     /// <summary>
     /// Starts profiling a section with the specified name.
@@ -26,7 +26,7 @@ public sealed class StepProfiler
 
     private void Return(StepSectionProfiler stepSectionProfiler)
     {
-        _stats.Add(new StepSectionStat
+        stats.Add(new StepSectionStat
         {
             SectionName = stepSectionProfiler.SectionName,
             Elapsed = stepSectionProfiler.Stopwatch.Elapsed

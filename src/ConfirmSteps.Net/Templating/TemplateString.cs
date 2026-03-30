@@ -132,7 +132,8 @@ public sealed class TemplateString : IEquatable<TemplateString>
             index = match.Index + match.Value.Length;
 
             match = match.NextMatch();
-        } while (match.Success);
+        }
+        while (match.Success);
 
         if (index < Template.Length)
         {

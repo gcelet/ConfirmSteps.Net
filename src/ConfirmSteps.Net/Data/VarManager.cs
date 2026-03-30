@@ -25,7 +25,7 @@ public sealed class VarManager<T>
     /// <returns>A dictionary of extracted variables.</returns>
     public IReadOnlyDictionary<string, object> Extract(T data)
     {
-        Dictionary<string, object> vars = new();
+        Dictionary<string, object> vars = new(StringComparer.Ordinal);
 
         foreach (VarProvider<T> varProvider in VarProviders)
         {

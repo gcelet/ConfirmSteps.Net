@@ -1,7 +1,9 @@
 ﻿namespace ConfirmSteps.Steps.Http.Rest;
 
 using System.Text.Json;
+
 using JsonCons.JmesPath;
+
 using JsonCons.JsonPath;
 
 /// <summary>
@@ -17,18 +19,19 @@ public static class JsonDocumentProviderExtensions
     /// <returns>The selected boolean value, or null if not found or not a boolean.</returns>
     public static bool? SelectBoolean(this IJsonDocumentProvider jsonDocumentProvider, string jsonPath)
     {
-        if (!jsonDocumentProvider.SelectJsonElement(jsonPath, null, out JsonElement? jsonElement) ||
-            !jsonElement.HasValue)
+        (bool found, JsonElement? jsonElement) = jsonDocumentProvider.SelectJsonElement(jsonPath, null);
+
+        if (!found || !jsonElement.HasValue)
         {
-            return null;
+          return null;
         }
 
         return jsonElement.Value.ValueKind switch
         {
-            JsonValueKind.True => true,
-            JsonValueKind.False => false,
-            JsonValueKind.Null => null,
-            _ => throw new ArgumentException()
+          JsonValueKind.True => true,
+          JsonValueKind.False => false,
+          JsonValueKind.Null => null,
+          _ => throw new ArgumentException(),
         };
     }
 
@@ -40,20 +43,22 @@ public static class JsonDocumentProviderExtensions
     /// <returns>An array of boolean values, or null if not found.</returns>
     public static bool?[]? SelectBooleanArray(this IJsonDocumentProvider jsonDocumentProvider, string jsonPath)
     {
-        if (!jsonDocumentProvider.SelectJsonElements(jsonPath, null, out IList<JsonElement>? jsonElements))
+        (bool found, IList<JsonElement>? jsonElements) = jsonDocumentProvider.SelectJsonElements(jsonPath, null);
+
+        if (!found)
         {
-            return null;
+          return null;
         }
 
         return jsonElements?.Where(e => e is
-                { ValueKind: JsonValueKind.True or JsonValueKind.False or JsonValueKind.Null })
-            .Select(e => e.ValueKind switch
-            {
-                JsonValueKind.True => true,
-                JsonValueKind.False => false,
-                JsonValueKind.Null => (bool?)null,
-                _ => throw new ArgumentException()
-            }).ToArray();
+            { ValueKind: JsonValueKind.True or JsonValueKind.False or JsonValueKind.Null })
+          .Select(e => e.ValueKind switch
+          {
+            JsonValueKind.True => true,
+            JsonValueKind.False => false,
+            JsonValueKind.Null => (bool?)null,
+            _ => throw new ArgumentException(),
+          }).ToArray();
     }
 
     /// <summary>
@@ -64,10 +69,11 @@ public static class JsonDocumentProviderExtensions
     /// <returns>The selected decimal value, or null if not found or not a number.</returns>
     public static decimal? SelectNumber(this IJsonDocumentProvider jsonDocumentProvider, string jsonPath)
     {
-        if (!jsonDocumentProvider.SelectJsonElement(jsonPath, JsonValueKind.Number, out JsonElement? jsonElement) ||
-            !jsonElement.HasValue)
+        (bool found, JsonElement? jsonElement) = jsonDocumentProvider.SelectJsonElement(jsonPath, JsonValueKind.Number);
+
+        if (!found || !jsonElement.HasValue)
         {
-            return null;
+          return null;
         }
 
         return jsonElement.Value.GetDecimal();
@@ -81,19 +87,20 @@ public static class JsonDocumentProviderExtensions
     /// <returns>An array of decimal values, or null if not found.</returns>
     public static decimal?[]? SelectNumberArray(this IJsonDocumentProvider jsonDocumentProvider, string jsonPath)
     {
-        if (!jsonDocumentProvider.SelectJsonElements(jsonPath, null,
-                out IList<JsonElement>? jsonElements))
+        (bool found, IList<JsonElement>? jsonElements) = jsonDocumentProvider.SelectJsonElements(jsonPath, null);
+
+        if (!found)
         {
-            return null;
+          return null;
         }
 
         return jsonElements?.Where(e => e is { ValueKind: JsonValueKind.Number or JsonValueKind.Null })
-            .Select(e => e.ValueKind switch
-            {
-                JsonValueKind.Number => e.GetDecimal(),
-                JsonValueKind.Null => (decimal?)null,
-                _ => throw new ArgumentException()
-            }).ToArray();
+          .Select(e => e.ValueKind switch
+          {
+            JsonValueKind.Number => e.GetDecimal(),
+            JsonValueKind.Null => (decimal?)null,
+            _ => throw new ArgumentException(),
+          }).ToArray();
     }
 
     /// <summary>
@@ -104,10 +111,10 @@ public static class JsonDocumentProviderExtensions
     /// <returns>The selected string value, or null if not found or not a string.</returns>
     public static string? SelectString(this IJsonDocumentProvider jsonDocumentProvider, string jsonPath)
     {
-        if (!jsonDocumentProvider.SelectJsonElement(jsonPath, JsonValueKind.String, out JsonElement? jsonElement) ||
-            !jsonElement.HasValue)
+        (bool found, JsonElement? jsonElement) = jsonDocumentProvider.SelectJsonElement(jsonPath, JsonValueKind.String);
+        if (!found || !jsonElement.HasValue)
         {
-            return null;
+          return null;
         }
 
         return jsonElement.Value.GetString();
@@ -121,10 +128,11 @@ public static class JsonDocumentProviderExtensions
     /// <returns>An array of string values, or null if not found.</returns>
     public static string?[]? SelectStringArray(this IJsonDocumentProvider jsonDocumentProvider, string jsonPath)
     {
-        if (!jsonDocumentProvider.SelectJsonElements(jsonPath, JsonValueKind.String,
-                out IList<JsonElement>? jsonElements))
+        (bool found, IList<JsonElement>? jsonElements) = jsonDocumentProvider.SelectJsonElements(jsonPath, JsonValueKind.String);
+
+        if (!found)
         {
-            return null;
+          return null;
         }
 
         return jsonElements?.Select(e => e.GetString()).ToArray();
@@ -223,34 +231,32 @@ public static class JsonDocumentProviderExtensions
         return result;
     }
 
-    private static bool SelectJsonElement(this IJsonDocumentProvider jsonDocumentProvider,
-        string jsonPath, JsonValueKind? jsonValueKind, out JsonElement? jsonElement)
+    private static (bool Found, JsonElement? JsonElement) SelectJsonElement(this IJsonDocumentProvider jsonDocumentProvider,
+      string jsonPath, JsonValueKind? jsonValueKind)
     {
-        jsonElement = null;
+        (bool found, IList<JsonElement>? jsonElements) = jsonDocumentProvider.SelectJsonElements(jsonPath, jsonValueKind);
 
-        if (!jsonDocumentProvider.SelectJsonElements(jsonPath, jsonValueKind,
-                out IList<JsonElement>? localJsonElements))
+        if (!found || jsonElements == null)
         {
-            return false;
+          return (false, null);
         }
 
-        if (localJsonElements is not { Count: 1 })
+        if (jsonElements is not { Count: 1 })
         {
-            return false;
+          return (false, null);
         }
 
-        jsonElement = localJsonElements[0];
-        return true;
+        JsonElement jsonElement = jsonElements[0];
+
+        return (true, jsonElement);
     }
 
-    private static bool SelectJsonElements(this IJsonDocumentProvider jsonDocumentProvider,
-        string jsonPath, JsonValueKind? jsonValueKind, out IList<JsonElement>? jsonElements)
+    private static (bool Found, IList<JsonElement>? JsonElements) SelectJsonElements(this IJsonDocumentProvider jsonDocumentProvider,
+        string jsonPath, JsonValueKind? jsonValueKind)
     {
-        jsonElements = null;
-
         if (jsonDocumentProvider.JsonDocument == null)
         {
-            return false;
+            return (false, null);
         }
 
         IList<JsonElement> localJsonElements =
@@ -258,15 +264,16 @@ public static class JsonDocumentProviderExtensions
 
         if (localJsonElements.Count == 0)
         {
-            return false;
+            return (false, null);
         }
 
         if (jsonValueKind.HasValue && localJsonElements.Any(e => e.ValueKind != jsonValueKind.Value))
         {
-            return false;
+            return (false, null);
         }
 
-        jsonElements = localJsonElements;
-        return true;
+        IList<JsonElement> jsonElements = localJsonElements;
+
+        return (true, jsonElements);
     }
 }

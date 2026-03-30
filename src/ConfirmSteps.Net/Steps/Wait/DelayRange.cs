@@ -82,7 +82,7 @@ public sealed class DelayRange
         double randomDouble = random.NextDouble();
         double lowerBound = Min.TotalMilliseconds;
         double upperBound = Max.TotalMilliseconds;
-        double randomRangeDouble = randomDouble * (upperBound - lowerBound) + lowerBound;
+        double randomRangeDouble = (randomDouble * (upperBound - lowerBound)) + lowerBound;
         TimeSpan delay = TimeSpan.FromMilliseconds(randomRangeDouble);
 
         return delay;

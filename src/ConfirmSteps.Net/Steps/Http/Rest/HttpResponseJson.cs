@@ -38,7 +38,7 @@ public sealed class HttpResponseJson : IJsonDocumentProvider, IDisposable
     /// <summary>
     /// Gets the HTTP status code.
     /// </summary>
-    public HttpStatusCode StatusCode => InnerResponse?.StatusCode ?? 0;
+    public HttpStatusCode StatusCode => InnerResponse?.StatusCode ?? (HttpStatusCode)0;
 
     private HttpResponseMessage? InnerResponse { get; }
 
