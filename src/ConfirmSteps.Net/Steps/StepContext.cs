@@ -18,13 +18,13 @@ public sealed class StepContext<T>
     {
         ScenarioContext = scenarioContext;
         Services = services;
-        Vars = new Dictionary<string, object>(vars);
+        Vars = new Dictionary<string, object>(vars, StringComparer.Ordinal);
     }
 
     /// <summary>
     /// Gets a dictionary of items that can be used to share data between phases of a step.
     /// </summary>
-    public Dictionary<string, object> Items { get; } = new();
+    public Dictionary<string, object> Items { get; } = new(StringComparer.Ordinal);
 
     /// <summary>
     /// Gets the parent scenario context.

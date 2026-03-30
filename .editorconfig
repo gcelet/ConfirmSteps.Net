@@ -199,6 +199,10 @@ dotnet_diagnostic.AV1580.severity = none
 # Rationale: Not always useful
 dotnet_diagnostic.AV1706.severity = suggestion
 
+# Purpose: Name types using nouns, noun phrases or adjective phrases
+# Rationale: Namings like Helper is sometime useful.
+dotnet_diagnostic.AV1708.severity = suggestion
+
 # Purpose: Field contains the name of its containing type
 # Rationale: It's not smart enough to understand that CustomFormatters is not the same as Formatter
 dotnet_diagnostic.AV1710.severity = suggestion
@@ -263,9 +267,17 @@ dotnet_diagnostic.MA0009.severity = suggestion
 # Rationale: We don't want to force this
 dotnet_diagnostic.MA0015.severity = suggestion
 
+# Purpose: Prefer using collection abstraction instead of implementation
+# Rationale: We don't want to force this
+dotnet_diagnostic.MA0016.severity = suggestion
+
 # Purpose: Use an explicit StringComparer to compute hash codes
 # Rationale: Too farfetched
 dotnet_diagnostic.MA0021.severity = suggestion
+
+# Purpose: Resolve the TODO comments in the code.
+# Rationale: We don't want to force this, but it's good to have a reminder.
+dotnet_diagnostic.MA0026.severity = suggestion
 
 # Purpose: Closing parenthesis should not be preceded by a space
 # Rationale: This conflicts with record constructors

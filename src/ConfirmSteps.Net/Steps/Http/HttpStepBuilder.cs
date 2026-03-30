@@ -1,10 +1,12 @@
 namespace ConfirmSteps.Steps.Http;
 
 using System.Text.Json;
+
 using ConfirmSteps.Internal;
 using ConfirmSteps.Steps.Http.RequestBuilding;
 using ConfirmSteps.Steps.Http.ResponseParsing;
 using ConfirmSteps.Steps.Http.Rest;
+
 using Microsoft.Extensions.DependencyInjection;
 
 /// <summary>

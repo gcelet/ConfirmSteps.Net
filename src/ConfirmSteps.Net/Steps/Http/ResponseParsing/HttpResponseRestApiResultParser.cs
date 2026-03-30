@@ -1,6 +1,7 @@
 ﻿namespace ConfirmSteps.Steps.Http.ResponseParsing;
 
 using System.Text.Json;
+
 using ConfirmSteps.Steps.Http.Problems;
 using ConfirmSteps.Steps.Http.Rest;
 
@@ -60,15 +61,15 @@ public class HttpResponseRestApiResultParser : IHttpResponseRestApiResultParser
     }
 
     /// <inheritdoc />
-    public async Task<HttpResponseParseResult<RestApiResult<R>>> TryParse<R>(
+    public async Task<HttpResponseParseResult<RestApiResult<TResponse>>> TryParse<TResponse>(
         HttpResponseJson? httpResponseJson, CancellationToken cancellationToken)
-        where R : class
+        where TResponse : class
     {
         HttpResponseParseResult<RestApiResult> parseResult = await TryParse(httpResponseJson, cancellationToken);
 
         if (!parseResult.Success || parseResult.Response == null)
         {
-            return new HttpResponseParseResult<RestApiResult<R>>
+            return new HttpResponseParseResult<RestApiResult<TResponse>>
             {
                 Success = false,
                 Exception = parseResult.Exception,
@@ -78,21 +79,21 @@ public class HttpResponseRestApiResultParser : IHttpResponseRestApiResultParser
         try
         {
             bool haveProblem = parseResult.Response.HaveProblem;
-            R? result = !haveProblem ? parseResult.Response.JsonResult!.Deserialize<R>() : null;
+            TResponse? result = !haveProblem ? parseResult.Response.JsonResult!.Deserialize<TResponse>() : null;
             ProblemDetails? problem =
                 haveProblem ? parseResult.Response.JsonProblem!.Deserialize<ProblemDetails>() : null;
 
-            return new HttpResponseParseResult<RestApiResult<R>>
+            return new HttpResponseParseResult<RestApiResult<TResponse>>
             {
                 Success = true,
-                Response = new RestApiResult<R>(httpResponseJson,
+                Response = new RestApiResult<TResponse>(httpResponseJson,
                     parseResult.Response.JsonResult, parseResult.Response.JsonProblem,
                     result, problem)
             };
         }
         catch (JsonException exception)
         {
-            return new HttpResponseParseResult<RestApiResult<R>>
+            return new HttpResponseParseResult<RestApiResult<TResponse>>
             {
                 Success = false,
                 Exception = exception,
@@ -100,7 +101,7 @@ public class HttpResponseRestApiResultParser : IHttpResponseRestApiResultParser
         }
         catch
         {
-            return HttpResponseParseResult<RestApiResult<R>>.Failed;
+            return HttpResponseParseResult<RestApiResult<TResponse>>.Failed;
         }
     }
 }

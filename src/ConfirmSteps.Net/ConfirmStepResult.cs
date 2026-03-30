@@ -7,7 +7,7 @@
 public sealed class ConfirmStepResult<T>
     where T : class
 {
-    private readonly List<StepResult<T>> _stepResults = new();
+    private readonly List<StepResult<T>> stepResults = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ConfirmStepResult{T}"/> class.
@@ -22,7 +22,7 @@ public sealed class ConfirmStepResult<T>
         Exception? exception = null)
     {
         Status = status;
-        _stepResults.AddRange(stepResults);
+        this.stepResults.AddRange(stepResults);
         Data = data;
         Vars = vars;
         Exception = exception;
@@ -46,7 +46,7 @@ public sealed class ConfirmStepResult<T>
     /// <summary>
     /// Gets the results of all steps in the scenario.
     /// </summary>
-    public IReadOnlyCollection<StepResult<T>> StepResults => _stepResults.AsReadOnly();
+    public IReadOnlyCollection<StepResult<T>> StepResults => stepResults.AsReadOnly();
 
     /// <summary>
     /// Gets the variables collected during scenario execution.
@@ -58,5 +58,5 @@ public sealed class ConfirmStepResult<T>
     /// </summary>
     /// <param name="index">The zero-based index of the step result to get.</param>
     /// <returns>The step result at the specified index.</returns>
-    public StepResult<T> this[int index] => _stepResults[index];
+    public StepResult<T> this[int index] => stepResults[index];
 }

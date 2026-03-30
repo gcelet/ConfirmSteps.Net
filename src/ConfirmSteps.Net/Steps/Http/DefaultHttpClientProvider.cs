@@ -7,9 +7,13 @@ using System.Net;
 /// </summary>
 public sealed class DefaultHttpClientProvider : IHttpClientProvider, ICookieContainerProvider
 {
+    #if NET9_0_OR_GREATER
+    private readonly System.Threading.Lock lockObject = new();
+    #else
     private readonly object lockObject = new();
+    #endif
 
-    private HttpClient? _httpClient;
+    private HttpClient? httpClient;
 
     private CookieContainer CookieContainer => CookieContainerLazy.Value;
 
@@ -19,22 +23,22 @@ public sealed class DefaultHttpClientProvider : IHttpClientProvider, ICookieCont
     {
         get
         {
-            if (_httpClient == null)
+            if (httpClient == null)
             {
                 lock (lockObject)
                 {
-                    if (_httpClient == null)
+                    if (httpClient == null)
                     {
                         HttpClientHandler handler = new()
                         {
                             CookieContainer = CookieContainer,
                         };
-                        _httpClient = new HttpClient(handler, true);
+                        httpClient = new HttpClient(handler, true);
                     }
                 }
             }
 
-            return _httpClient;
+            return httpClient;
         }
     }
 

@@ -30,5 +30,5 @@ public sealed class ScenarioContext<T>
     /// <summary>
     /// Gets or sets the variables collected during execution.
     /// </summary>
-    public Dictionary<string, object> Vars { get; set; } = new();
+    public Dictionary<string, object> Vars { get; set; } = new(StringComparer.Ordinal);
 }

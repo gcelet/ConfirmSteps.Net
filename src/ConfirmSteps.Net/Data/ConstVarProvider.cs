@@ -7,7 +7,11 @@
 public sealed class ConstVarProvider<T> : VarProvider<T>
     where T : class
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ConstVarProvider{T}"/> class with a constant value.
+    /// </summary>
+    /// <param name="key">The key of the variable to provide.</param>
+    /// <param name="value">The constant value to provide.</param>
     public ConstVarProvider(string key, object value)
         : base(key)
     {
