@@ -8,7 +8,7 @@
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageVersion Include="JsonCons.JmesPath" Version="1.0.0" />
     <PackageVersion Include="JsonCons.JsonPath" Version="1.1.0" />
-    <PackageVersion Include="AsyncFixer" Version="1.6.0" />
+    <PackageVersion Include="AsyncFixer" Version="2.1.0" />
     <PackageVersion Include="Meziantou.Analyzer" Version="3.0.29" />
     <PackageVersion Include="PolySharp" Version="1.15.0" />
     <PackageVersion Include="Roslynator.Analyzers" Version="4.15.0" />
