@@ -11,7 +11,7 @@ public abstract class VarProvider<T>
     /// Initializes a new instance of the <see cref="VarProvider{T}"/> class.
     /// </summary>
     /// <param name="key">The key (name) of the variable.</param>
-    public VarProvider(string key)
+    protected VarProvider(string key)
     {
         Key = key;
     }

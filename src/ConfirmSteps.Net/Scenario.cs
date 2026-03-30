@@ -65,7 +65,7 @@ public sealed class Scenario<T>
         IServiceScopeFactory serviceScopeFactory = Services.GetRequiredService<IServiceScopeFactory>();
         ScenarioContext<T> scenarioContext = new(data, Services)
         {
-            Vars = new Dictionary<string, object>(globalVars)
+            Vars = new Dictionary<string, object>(globalVars, StringComparer.Ordinal)
         };
         Exception? scenarioException = null;
         List<StepResult<T>> stepResults = new();
@@ -84,8 +84,8 @@ public sealed class Scenario<T>
                 stepResult =
                     await currentStep.ConfirmStep(stepContext, cancellationToken).ConfigureAwait(false);
                 scenarioContext.Vars = stepResult.Vars.Concat(scenarioContext.Vars)
-                    .GroupBy(kvp => kvp.Key)
-                    .ToDictionary(g => g.Key, g => g.First().Value);
+                    .GroupBy(kvp => kvp.Key, StringComparer.Ordinal)
+                    .ToDictionary(g => g.Key, g => g.First().Value, StringComparer.Ordinal);
                 scenarioStatus = stepResult.Status;
                 scenarioException = stepResult.Exception;
             }
@@ -95,7 +95,7 @@ public sealed class Scenario<T>
                 {
                     Status = ConfirmStatus.Indecisive,
                     State = StepState.Idle,
-                    Vars = new Dictionary<string, object>(scenarioContext.Vars)
+                    Vars = new Dictionary<string, object>(scenarioContext.Vars, StringComparer.Ordinal)
                 };
             }
 
@@ -103,7 +103,7 @@ public sealed class Scenario<T>
         }
 
         ConfirmStepResult<T> result = new(scenarioStatus, stepResults, scenarioContext.Data,
-            new Dictionary<string, object>(scenarioContext.Vars), scenarioException);
+            new Dictionary<string, object>(scenarioContext.Vars, StringComparer.Ordinal), scenarioException);
 
         return result;
     }

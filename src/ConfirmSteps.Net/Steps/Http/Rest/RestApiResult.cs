@@ -2,6 +2,7 @@
 
 using System.Net;
 using System.Text.Json;
+
 using ConfirmSteps.Steps.Http.Problems;
 
 /// <summary>
@@ -46,7 +47,7 @@ public class RestApiResult : IJsonDocumentProvider, IDisposable
     /// <summary>
     /// Gets the HTTP status code.
     /// </summary>
-    public HttpStatusCode StatusCode => InnerResponse?.StatusCode ?? 0;
+    public HttpStatusCode StatusCode => InnerResponse?.StatusCode ?? (HttpStatusCode)0;
 
     private HttpResponseJson? InnerResponse { get; }
 

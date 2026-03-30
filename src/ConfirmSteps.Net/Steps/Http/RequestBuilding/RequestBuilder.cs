@@ -3,6 +3,7 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Web;
+
 using ConfirmSteps.Templating;
 
 /// <summary>
@@ -222,6 +223,11 @@ public sealed class RequestBuilder : IHttpRequestMessageConverter
             else if (haveContent && !string.Equals(HeaderNames.ContentType, name, StringComparison.OrdinalIgnoreCase))
             {
                 httpRequestMessage.Content!.Headers.TryAddWithoutValidation(name, value);
+            }
+            else
+            {
+                // If the header is a content header but there is no content, or if it's a content-type header, we can't add it to the request.
+                // In this case, we can choose to ignore it or throw an exception. Here, we'll ignore it.
             }
         }
     }

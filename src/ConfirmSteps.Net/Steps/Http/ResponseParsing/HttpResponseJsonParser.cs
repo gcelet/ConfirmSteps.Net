@@ -1,6 +1,7 @@
 ﻿namespace ConfirmSteps.Steps.Http.ResponseParsing;
 
 using System.Text.Json;
+
 using ConfirmSteps.Steps.Http.Rest;
 
 /// <summary>

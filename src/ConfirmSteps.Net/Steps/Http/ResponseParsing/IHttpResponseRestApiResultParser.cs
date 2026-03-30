@@ -19,11 +19,11 @@ public interface IHttpResponseRestApiResultParser
     /// <summary>
     /// Attempts to parse the JSON response into a typed REST API result.
     /// </summary>
-    /// <typeparam name="R">The type of the expected result data.</typeparam>
+    /// <typeparam name="TResponse">The type of the expected result data.</typeparam>
     /// <param name="httpResponseJson">The JSON response to parse.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A parse result containing the typed REST API result or failure information.</returns>
-    Task<HttpResponseParseResult<RestApiResult<R>>> TryParse<R>(HttpResponseJson? httpResponseJson,
+    Task<HttpResponseParseResult<RestApiResult<TResponse>>> TryParse<TResponse>(HttpResponseJson? httpResponseJson,
         CancellationToken cancellationToken)
-        where R : class;
+        where TResponse : class;
 }
