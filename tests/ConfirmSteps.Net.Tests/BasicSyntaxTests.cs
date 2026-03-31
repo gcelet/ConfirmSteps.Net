@@ -9,6 +9,7 @@ using Microsoft.Net.Http.Headers;
 using static CancellationExtensions;
 using static ConfirmSteps.Steps.Http.ResponseParsing.HttpResponseExtractors;
 
+[TestFixture]
 public class BasicSyntaxTests
 {
     [Test]

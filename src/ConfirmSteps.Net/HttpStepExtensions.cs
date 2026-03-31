@@ -22,7 +22,7 @@ public static class HttpStepExtensions
         Action<HttpStepBuilder<T>>? stepBuilder = null)
         where T : class
     {
-        HttpStepBuilder<T> httpStepBuilder = new(requestBuilder);
+        HttpStepBuilder<T> httpStepBuilder = new(title, requestBuilder);
 
         stepBuilder?.Invoke(httpStepBuilder);
 
