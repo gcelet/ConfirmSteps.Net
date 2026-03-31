@@ -19,7 +19,7 @@ public static class CodeStepExtensions
         Action<CodeStepBuilder<T>> stepBuilder)
         where T : class
     {
-        CodeStepBuilder<T> codeStepBuilder = new();
+        CodeStepBuilder<T> codeStepBuilder = new(title);
 
         stepBuilder.Invoke(codeStepBuilder);
 

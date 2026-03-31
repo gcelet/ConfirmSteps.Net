@@ -1,6 +1,5 @@
 ﻿namespace ConfirmSteps.Net.Tests;
 
-using System.Diagnostics;
 using WireMock.Logging;
 using WireMock.Server;
 using WireMock.Settings;
