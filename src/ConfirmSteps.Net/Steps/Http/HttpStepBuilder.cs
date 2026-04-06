@@ -5,6 +5,7 @@ using System.Text.Json;
 using ConfirmSteps.Internal;
 using ConfirmSteps.Steps.Http.RequestBuilding;
 using ConfirmSteps.Steps.Http.ResponseParsing;
+using ConfirmSteps.Steps.Http.ResponseVerification;
 using ConfirmSteps.Steps.Http.Rest;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -33,8 +34,9 @@ public sealed class HttpStepBuilder<T> : IStepBuilder<T>
 
   private string Title { get; }
 
-  private Func<HttpResponseMessage, StepContext<T>, CancellationToken, Task> VerifyFunc { get; set; } =
-    (_, _, _) => Task.CompletedTask;
+  private HttpResponseVerificationMode VerificationMode { get; set; } = HttpResponseVerificationMode.StopOnFirstFailure;
+
+  private List<IHttpResponseVerifier<T>> Verifiers { get; } = new();
 
   /// <summary>
   /// Configures data extraction from the HTTP response.
@@ -59,11 +61,11 @@ public sealed class HttpStepBuilder<T> : IStepBuilder<T>
   /// <returns>The current <see cref="HttpStepBuilder{T}"/> for fluent chaining.</returns>
   public HttpStepBuilder<T> Verify(Action<HttpResponseMessage, StepContext<T>> verify)
   {
-    VerifyFunc = (response, stepContext, _) =>
+    Verifiers.Add(new HttpResponseMessageVerifier<T>((response, stepContext, _) =>
     {
       verify(response, stepContext);
       return Task.CompletedTask;
-    };
+    }));
 
     return this;
   }
@@ -75,7 +77,7 @@ public sealed class HttpStepBuilder<T> : IStepBuilder<T>
   /// <returns>The current <see cref="HttpStepBuilder{T}"/> for fluent chaining.</returns>
   public HttpStepBuilder<T> Verify(Func<HttpResponseMessage, StepContext<T>, CancellationToken, Task> verify)
   {
-    VerifyFunc = verify;
+    Verifiers.Add(new HttpResponseMessageVerifier<T>(verify));
 
     return this;
   }
@@ -87,12 +89,11 @@ public sealed class HttpStepBuilder<T> : IStepBuilder<T>
   /// <returns>The current <see cref="HttpStepBuilder{T}"/> for fluent chaining.</returns>
   public HttpStepBuilder<T> VerifyJson(Action<HttpResponseJson, StepContext<T>> verify)
   {
-    VerifyFunc = async (response, stepContext, ct) =>
+    Verifiers.Add(new HttpResponseJsonVerifier<T>((jsonResponse, stepContext, _) =>
     {
-      HttpResponseJson jsonResponse = await stepContext.ParseJson(response, ct);
-
       verify(jsonResponse, stepContext);
-    };
+      return Task.CompletedTask;
+    }));
 
     return this;
   }
@@ -104,13 +105,7 @@ public sealed class HttpStepBuilder<T> : IStepBuilder<T>
   /// <returns>The current <see cref="HttpStepBuilder{T}"/> for fluent chaining.</returns>
   public HttpStepBuilder<T> VerifyJson(Func<HttpResponseJson, StepContext<T>, CancellationToken, Task> verify)
   {
-    VerifyFunc = async (response, stepContext, ct) =>
-    {
-      HttpResponseJson jsonResponse = await stepContext.ParseJson(response, ct);
-
-      await verify(jsonResponse, stepContext, ct);
-    };
-
+    Verifiers.Add(new HttpResponseJsonVerifier<T>(verify));
     return this;
   }
 
@@ -121,12 +116,11 @@ public sealed class HttpStepBuilder<T> : IStepBuilder<T>
   /// <returns>The current <see cref="HttpStepBuilder{T}"/> for fluent chaining.</returns>
   public HttpStepBuilder<T> VerifyRestApiResult(Action<RestApiResult, StepContext<T>> verify)
   {
-    VerifyFunc = async (response, stepContext, ct) =>
+    Verifiers.Add(new RestApiResultVerifier<T>((restApiResult, stepContext, _) =>
     {
-      RestApiResult restApiResult = await stepContext.ParseRestApi(response, ct);
-
       verify(restApiResult, stepContext);
-    };
+      return Task.CompletedTask;
+    }));
 
     return this;
   }
@@ -138,13 +132,7 @@ public sealed class HttpStepBuilder<T> : IStepBuilder<T>
   /// <returns>The current <see cref="HttpStepBuilder{T}"/> for fluent chaining.</returns>
   public HttpStepBuilder<T> VerifyRestApiResult(Func<RestApiResult, StepContext<T>, CancellationToken, Task> verify)
   {
-    VerifyFunc = async (response, stepContext, ct) =>
-    {
-      RestApiResult restApiResult = await stepContext.ParseRestApi(response, ct);
-
-      await verify(restApiResult, stepContext, ct);
-    };
-
+    Verifiers.Add(new RestApiResultVerifier<T>(verify));
     return this;
   }
 
@@ -157,12 +145,11 @@ public sealed class HttpStepBuilder<T> : IStepBuilder<T>
   public HttpStepBuilder<T> VerifyRestApiResult<TResult>(Action<RestApiResult<TResult>, StepContext<T>> verify)
     where TResult : class
   {
-    VerifyFunc = async (response, stepContext, ct) =>
+    Verifiers.Add(new RestApiResultVerifier<T, TResult>((stepContext, restApiResult, _) =>
     {
-      RestApiResult<TResult> restApiResult = await stepContext.ParseRestApi<T, TResult>(response, ct);
-
-      verify(restApiResult, stepContext);
-    };
+      verify(stepContext, restApiResult);
+      return Task.CompletedTask;
+    }));
 
     return this;
   }
@@ -177,13 +164,19 @@ public sealed class HttpStepBuilder<T> : IStepBuilder<T>
     Func<RestApiResult<TResult>, StepContext<T>, CancellationToken, Task> verify)
     where TResult : class
   {
-    VerifyFunc = async (response, stepContext, ct) =>
-    {
-      RestApiResult<TResult> restApiResult = await stepContext.ParseRestApi<T, TResult>(response, ct);
+    Verifiers.Add(new RestApiResultVerifier<T, TResult>(verify));
+    return this;
+  }
 
-      await verify(restApiResult, stepContext, ct);
-    };
-
+  /// <summary>
+  /// Configures the mode of HTTP response verification, determining how the verifiers are applied to the HTTP response
+  /// and how failures are handled during the verification process.
+  /// </summary>
+  /// <param name="verificationMode">The mode of HTTP response verification to be applied for this step.</param>
+  /// <returns>>The current <see cref="HttpStepBuilder{T}"/> for fluent chaining.</returns>
+  public HttpStepBuilder<T> WithVerificationMode(HttpResponseVerificationMode verificationMode)
+  {
+    VerificationMode = verificationMode;
     return this;
   }
 
@@ -192,7 +185,7 @@ public sealed class HttpStepBuilder<T> : IStepBuilder<T>
   {
     RequestBuilder requestBuilder = RequestBuilder.Invoke();
 
-    return new HttpStep<T>(Title, requestBuilder, VerifyFunc, Extractors);
+    return new HttpStep<T>(Title, requestBuilder, Verifiers, VerificationMode, Extractors);
   }
 
   /// <inheritdoc />
