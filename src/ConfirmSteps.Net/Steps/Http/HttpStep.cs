@@ -2,6 +2,7 @@
 
 using ConfirmSteps.Steps.Http.RequestBuilding;
 using ConfirmSteps.Steps.Http.ResponseParsing;
+using ConfirmSteps.Steps.Http.ResponseVerification;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,13 +18,17 @@ public sealed class HttpStep<T> : Step<T>
   /// </summary>
   /// <param name="title">The title of the step.</param>
   /// <param name="requestBuilder">The builder used to construct the HTTP request.</param>
-  /// <param name="verifyResponse">A delegate that verifies the HTTP response message.</param>
+  /// <param name="verifiers">A list of verifiers to validate the HTTP response.</param>
+  /// <param name="verificationMode">
+  /// The mode of HTTP response verification, determining how the verifiers are applied and how failures are handled.
+  /// </param>
   /// <param name="extractors">A list of extractors to pull data from the HTTP response.</param>
   public HttpStep(string title, RequestBuilder requestBuilder,
-    Func<HttpResponseMessage, StepContext<T>, CancellationToken, Task> verifyResponse,
+    IReadOnlyList<IHttpResponseVerifier<T>> verifiers,
+    HttpResponseVerificationMode verificationMode,
     IReadOnlyList<IHttpResponseExtractor<T>> extractors)
     : base(title, new HttpStepPreparer(requestBuilder), new HttpStepExecutor(),
-      new HttpStepVerifier(verifyResponse), new HttpStepExtractor(extractors))
+      new HttpStepVerifier(verifiers, verificationMode), new HttpStepExtractor(extractors))
   {
   }
 
@@ -108,12 +113,15 @@ public sealed class HttpStep<T> : Step<T>
 
   private class HttpStepVerifier : IStepVerifier<T>
   {
-    public HttpStepVerifier(Func<HttpResponseMessage, StepContext<T>, CancellationToken, Task> verifyResponse)
+    public HttpStepVerifier(IReadOnlyList<IHttpResponseVerifier<T>> verifiers, HttpResponseVerificationMode verificationMode)
     {
-      VerifyResponse = verifyResponse;
+      Verifiers = verifiers;
+      VerificationMode = verificationMode;
     }
 
-    private Func<HttpResponseMessage, StepContext<T>, CancellationToken, Task> VerifyResponse { get; }
+    private HttpResponseVerificationMode VerificationMode { get; }
+
+    private IReadOnlyList<IHttpResponseVerifier<T>> Verifiers { get; }
 
     /// <inheritdoc />
     public async Task<ConfirmStatus> VerifyStep(StepContext<T> stepContext, CancellationToken cancellationToken)
@@ -123,9 +131,32 @@ public sealed class HttpStep<T> : Step<T>
         return ConfirmStatus.Failure;
       }
 
-      await VerifyResponse(response, stepContext, cancellationToken);
+      ConfirmStatus confirmStatus = ConfirmStatus.Success;
+      List<Exception> exceptions = new();
 
-      return ConfirmStatus.Success;
+      foreach (IHttpResponseVerifier<T> verifier in Verifiers)
+      {
+        try
+        {
+          await verifier.Verify(stepContext, response, cancellationToken);
+        }
+        catch (Exception exception)
+        {
+          confirmStatus = ConfirmStatus.Failure;
+          exceptions.Add(exception);
+          if (VerificationMode == HttpResponseVerificationMode.StopOnFirstFailure)
+          {
+            break;
+          }
+        }
+      }
+
+      return exceptions.Count switch
+      {
+        1 => throw exceptions[0],
+        > 1 => throw new AggregateException(exceptions),
+        _ => confirmStatus
+      };
     }
   }
 }
