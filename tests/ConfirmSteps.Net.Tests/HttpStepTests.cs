@@ -1,6 +1,7 @@
 ﻿namespace ConfirmSteps.Net.Tests;
 
 using System.Net;
+using System.Net.Mime;
 using System.Text.Json.Serialization;
 
 using AwesomeAssertions;
@@ -10,6 +11,8 @@ using ConfirmSteps.Steps.Http;
 using ConfirmSteps.Steps.Http.Problems;
 using ConfirmSteps.Steps.Http.RequestBuilding;
 using ConfirmSteps.Steps.Http.ResponseVerification;
+
+using Microsoft.Net.Http.Headers;
 
 using static CancellationExtensions;
 
@@ -284,6 +287,75 @@ public class HttpStepTests : HttpStepTestBase
   }
 
   [Test]
+  public async Task SingleGetStepScenario_Should_AllowToVerifyAllResponseHeaders()
+  {
+    if (Server == null)
+    {
+      Assert.Fail("WireMockServer is null");
+      return;
+    }
+
+    // Arrange
+    Server.SetUpGetUsers();
+
+    HttpClient httpClient = Server.CreateClient();
+    Scenario<MonitoringHeartbeatScenarioData> scenario = Scenario
+        .New<MonitoringHeartbeatScenarioData>("[HttpSteapRunAllVerifiersWhenUsingDefaultModeEvenIfAllVerifiersSucceed]-")
+        .WithServices(s => s.AddExternalHttpClient(httpClient))
+        .WithSteps(steps => steps
+          .HttpStep("[Step-01]-GET-/users",
+            () => RequestBuilder.Get().AppendPathSegment("users"),
+            step => step
+              .Verify((r, _) =>
+              {
+                r.Content.Should().NotBeNull();
+                r.Content.Headers.Should().NotBeNull();
+                r.Content.Headers.ContentType.Should().NotBeNull().And.Subject.ToString().Should().Be(MediaTypeNames.Application.Json);
+                r.Headers.AcceptRanges.Should().Contain("items");
+                r.Content.Headers.ContentRange.Should().NotBeNull().And.Subject.ToString().Should().Be("items 1-3/25");
+              })
+              .VerifyJson((r, _) =>
+              {
+                r.Headers.Should().NotBeNull();
+                r.Headers.Contains(Microsoft.Net.Http.Headers.HeaderNames.ContentType).Should().BeTrue();
+                r.Headers.GetValues(Microsoft.Net.Http.Headers.HeaderNames.ContentType).Should()
+                  .Contain(MediaTypeNames.Application.Json);
+
+                r.Headers.Contains(Microsoft.Net.Http.Headers.HeaderNames.AcceptRanges).Should().BeTrue();
+                r.Headers.GetValues(Microsoft.Net.Http.Headers.HeaderNames.AcceptRanges).Should().Contain("items");
+                r.Headers.Contains(Microsoft.Net.Http.Headers.HeaderNames.ContentRange).Should().BeTrue();
+                r.Headers.GetValues(Microsoft.Net.Http.Headers.HeaderNames.ContentRange).Should().Contain("items 1-3/25");
+              })
+              .VerifyRestApiResult((r, _) =>
+              {
+                r.Headers.Should().NotBeNull();
+                r.Headers.Contains(Microsoft.Net.Http.Headers.HeaderNames.ContentType).Should().BeTrue();
+                r.Headers.GetValues(Microsoft.Net.Http.Headers.HeaderNames.ContentType)
+                  .Should().Contain(MediaTypeNames.Application.Json);
+                r.Headers.Contains(Microsoft.Net.Http.Headers.HeaderNames.AcceptRanges).Should().BeTrue();
+                r.Headers.GetValues(Microsoft.Net.Http.Headers.HeaderNames.AcceptRanges).Should().Contain("items");
+                r.Headers.Contains(Microsoft.Net.Http.Headers.HeaderNames.ContentRange).Should().BeTrue();
+                r.Headers.GetValues(Microsoft.Net.Http.Headers.HeaderNames.ContentRange).Should().Contain("items 1-3/25");
+              })
+          )
+        )
+        .Build()
+      ;
+
+    MonitoringHeartbeatScenarioData data = new();
+    // Act
+    using CancellationTokenSource cts = CreateDefaultScenarioCancellationTokenSource();
+    ConfirmStepResult<MonitoringHeartbeatScenarioData> confirmResult = await scenario.ConfirmSteps(data, cts.Token);
+
+    // Assert
+    confirmResult.Should().BeEquivalentTo(new
+    {
+      Status = ConfirmStatus.Success,
+      Exception = (Exception)null!,
+    });
+  }
+
+  [Test]
   public async Task SingleGetStepScenario_Should_RunAllVerifiersWhenUsingDefaultModeEvenIfAllVerifiersSucceed()
   {
     if (Server == null)
@@ -382,8 +454,8 @@ public class HttpStepTests : HttpStepTestBase
       .And.SatisfyRespectively(
         httpResponseMessageException =>
           httpResponseMessageException.Message.Should().Be("Fail from HttpResponseMessage verification"),
-          httpResponseJsonException => httpResponseJsonException.Message.Should().Be("Fail from HttpResponseJson verification"),
-          restApiResultException => restApiResultException.Message.Should().Be("Fail from RestApiResult verification")
+        httpResponseJsonException => httpResponseJsonException.Message.Should().Be("Fail from HttpResponseJson verification"),
+        restApiResultException => restApiResultException.Message.Should().Be("Fail from RestApiResult verification")
       )
       ;
   }

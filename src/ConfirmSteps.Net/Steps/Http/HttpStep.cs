@@ -46,10 +46,8 @@ public sealed class HttpStep<T> : Step<T>
       }
 
       HttpResponseMessage response = await httpClient.SendAsync(request, cancellationToken);
-      string content = await response.Content.ReadAsStringAsync(cancellationToken);
 
-      response.Content = new StringContent(content);
-
+      await response.Content.LoadIntoBufferAsync();
       stepContext.AddItem(response);
 
       return ConfirmStatus.Success;

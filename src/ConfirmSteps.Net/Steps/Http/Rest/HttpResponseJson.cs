@@ -4,6 +4,8 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 
+using ConfirmSteps.Steps.Http.ResponseParsing;
+
 /// <summary>
 /// Represents an HTTP response with a JSON body.
 /// </summary>
@@ -18,12 +20,26 @@ public sealed class HttpResponseJson : IJsonDocumentProvider, IDisposable
     {
         InnerResponse = innerResponse;
         Response = response;
+        HeadersLazy = new(() =>
+        {
+          if (InnerResponse == null)
+          {
+            return null;
+          }
+
+          HttpResponseHeaders headers = InnerResponse.Headers;
+          HttpContentHeaders? contentHeaders = InnerResponse.Content?.Headers;
+
+          return new HttpResponseCombinedHeaders(headers, contentHeaders);
+        });
     }
+
+    private Lazy<HttpResponseCombinedHeaders?> HeadersLazy { get; }
 
     /// <summary>
     /// Gets the HTTP headers from the response.
     /// </summary>
-    public HttpResponseHeaders? Headers => InnerResponse?.Headers;
+    public HttpHeaders? Headers => HeadersLazy.Value;
 
     /// <summary>
     /// Gets a value indicating whether the HTTP response was successful.
