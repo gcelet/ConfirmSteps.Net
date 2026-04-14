@@ -49,6 +49,27 @@ public static class WireMockServerSetUpExtensions
     );
   }
 
+  public static void SetUpGetUsers(this WireMockServer? server,
+    HttpStatusCode statusCode = HttpStatusCode.PartialContent)
+  {
+    string jsonBody = $$"""
+                            [{"id": 1}, {"id": 2}, {"id": 3}]
+                        """;
+
+    server?.Given(
+      Request.Create()
+        .WithPath($"/users")
+        .UsingGet()
+    ).RespondWith(
+      Response.Create()
+        .WithStatusCode(statusCode)
+        .WithBody(jsonBody)
+        .WithHeader(Microsoft.Net.Http.Headers.HeaderNames.ContentType, MediaTypeNames.Application.Json)
+        .WithHeader(Microsoft.Net.Http.Headers.HeaderNames.AcceptRanges, "items")
+        .WithHeader(Microsoft.Net.Http.Headers.HeaderNames.ContentRange, "items 1-3/25")
+    );
+  }
+
   public static void SetUpGetNotFoundProblem(this WireMockServer? server,
     string path, bool returnProblemContentType = true)
   {
