@@ -18,6 +18,10 @@
     <PackageReference Include="NUnit"/>
     <PackageReference Include="NUnit.Analyzers"/>
     <PackageReference Include="NUnit3TestAdapter"/>
+    <PackageReference Include="PolySharp">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="WireMock.Net"/>
   </ItemGroup>
 

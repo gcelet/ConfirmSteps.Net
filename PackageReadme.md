@@ -81,7 +81,7 @@ Write a sequence of steps to confirm inside a unit test with your favorite testi
             await scenario.ConfirmSteps(data, CancellationToken.None);
 
         // Assert
-        Assert.AreEqual(ConfirmStatus.Success, confirmResult.Status);
+        Assert.AreEqual(ConfirmStatus.Success, confirmResult.Status, confirmResult.GetExecutionSummary());
         Assert.AreEqual(201, confirmResult.Data.ToDoId);
     }
 

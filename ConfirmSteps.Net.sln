@@ -34,6 +34,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02-files", "02-files", "{7B
 		.config\dotnet-tools.json = .config\dotnet-tools.json
 		global.json = global.json
 		PackageReadme.md = PackageReadme.md
+		README.md = README.md
 	EndProjectSection
 EndProject
 Global
