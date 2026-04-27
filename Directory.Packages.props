@@ -9,7 +9,7 @@
     <PackageVersion Include="JsonCons.JmesPath" Version="1.0.0" />
     <PackageVersion Include="JsonCons.JsonPath" Version="1.1.0" />
     <PackageVersion Include="AsyncFixer" Version="2.1.0" />
-    <PackageVersion Include="Meziantou.Analyzer" Version="3.0.39" />
+    <PackageVersion Include="Meziantou.Analyzer" Version="3.0.54" />
     <PackageVersion Include="PolySharp" Version="1.15.0" />
     <PackageVersion Include="Roslynator.Analyzers" Version="4.15.0" />
     <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.22.0.136894" />
