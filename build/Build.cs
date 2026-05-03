@@ -309,8 +309,7 @@ class Build : NukeBuild
       .Description($"Publishing to NuGet with the version.")
       .Requires(() => Configuration.Equals(Configuration.Release))
       .DependsOn(Pack)
-      .OnlyWhenStatic(() => !string.IsNullOrEmpty(NuGetApiKey) &&
-                            (GitRepository.IsOnMainOrMasterBranch() || IsTag))
+      .OnlyWhenStatic(() => !string.IsNullOrEmpty(NuGetApiKey) && IsTag)
       .Executes(() =>
       {
         PublishNugetDirectory.GlobFiles("*.nupkg")
