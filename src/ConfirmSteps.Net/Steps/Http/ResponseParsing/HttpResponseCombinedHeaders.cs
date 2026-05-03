@@ -19,7 +19,7 @@ public class HttpResponseCombinedHeaders : HttpHeaders
     {
       foreach (string value in header.Value)
       {
-        Add(header.Key, value);
+        TryAddWithoutValidation(header.Key, value);
       }
     }
 
@@ -29,7 +29,7 @@ public class HttpResponseCombinedHeaders : HttpHeaders
       {
         foreach (string value in header.Value)
         {
-          Add(header.Key, value);
+          TryAddWithoutValidation(header.Key, value);
         }
       }
     }

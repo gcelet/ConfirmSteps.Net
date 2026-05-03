@@ -50,7 +50,9 @@ public static class WireMockServerSetUpExtensions
   }
 
   public static void SetUpGetUsers(this WireMockServer? server,
-    HttpStatusCode statusCode = HttpStatusCode.PartialContent)
+    HttpStatusCode statusCode = HttpStatusCode.PartialContent,
+    string acceptRanges = "items",
+    string contentRange = "items 1-3/25")
   {
     string jsonBody = $$"""
                             [{"id": 1}, {"id": 2}, {"id": 3}]
@@ -65,8 +67,8 @@ public static class WireMockServerSetUpExtensions
         .WithStatusCode(statusCode)
         .WithBody(jsonBody)
         .WithHeader(Microsoft.Net.Http.Headers.HeaderNames.ContentType, MediaTypeNames.Application.Json)
-        .WithHeader(Microsoft.Net.Http.Headers.HeaderNames.AcceptRanges, "items")
-        .WithHeader(Microsoft.Net.Http.Headers.HeaderNames.ContentRange, "items 1-3/25")
+        .WithHeader(Microsoft.Net.Http.Headers.HeaderNames.AcceptRanges, acceptRanges)
+        .WithHeader(Microsoft.Net.Http.Headers.HeaderNames.ContentRange, contentRange)
     );
   }
 
