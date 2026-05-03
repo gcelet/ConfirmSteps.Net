@@ -1,6 +1,7 @@
 ﻿namespace ConfirmSteps.Net.Tests;
 
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Mime;
 using System.Text.Json.Serialization;
 
@@ -11,8 +12,6 @@ using ConfirmSteps.Steps.Http;
 using ConfirmSteps.Steps.Http.Problems;
 using ConfirmSteps.Steps.Http.RequestBuilding;
 using ConfirmSteps.Steps.Http.ResponseVerification;
-
-using Microsoft.Net.Http.Headers;
 
 using static CancellationExtensions;
 
@@ -296,11 +295,13 @@ public class HttpStepTests : HttpStepTestBase
     }
 
     // Arrange
+    const string acceptRangesValue = "items";
+    const string contentRangeValue = "items 1-3/25";
     Server.SetUpGetUsers();
 
     HttpClient httpClient = Server.CreateClient();
     Scenario<MonitoringHeartbeatScenarioData> scenario = Scenario
-        .New<MonitoringHeartbeatScenarioData>("[HttpSteapRunAllVerifiersWhenUsingDefaultModeEvenIfAllVerifiersSucceed]-")
+        .New<MonitoringHeartbeatScenarioData>("[HttpStepAllowToVerifyAllResponseHeaders]")
         .WithServices(s => s.AddExternalHttpClient(httpClient))
         .WithSteps(steps => steps
           .HttpStep("[Step-01]-GET-/users",
@@ -310,9 +311,11 @@ public class HttpStepTests : HttpStepTestBase
               {
                 r.Content.Should().NotBeNull();
                 r.Content.Headers.Should().NotBeNull();
-                r.Content.Headers.ContentType.Should().NotBeNull().And.Subject.ToString().Should().Be(MediaTypeNames.Application.Json);
-                r.Headers.AcceptRanges.Should().Contain("items");
-                r.Content.Headers.ContentRange.Should().NotBeNull().And.Subject.ToString().Should().Be("items 1-3/25");
+                r.Content.Headers.ContentType.Should().NotBeNull().And.Subject.ToString().Should()
+                  .Be(MediaTypeNames.Application.Json);
+
+                r.Headers.AcceptRanges.Should().Contain(acceptRangesValue);
+                r.Content.Headers.ContentRange.Should().NotBeNull().And.Subject.ToString().Should().Be(contentRangeValue);
               })
               .VerifyJson((r, _) =>
               {
@@ -322,9 +325,9 @@ public class HttpStepTests : HttpStepTestBase
                   .Contain(MediaTypeNames.Application.Json);
 
                 r.Headers.Contains(Microsoft.Net.Http.Headers.HeaderNames.AcceptRanges).Should().BeTrue();
-                r.Headers.GetValues(Microsoft.Net.Http.Headers.HeaderNames.AcceptRanges).Should().Contain("items");
+                r.Headers.GetValues(Microsoft.Net.Http.Headers.HeaderNames.AcceptRanges).Should().Contain(acceptRangesValue);
                 r.Headers.Contains(Microsoft.Net.Http.Headers.HeaderNames.ContentRange).Should().BeTrue();
-                r.Headers.GetValues(Microsoft.Net.Http.Headers.HeaderNames.ContentRange).Should().Contain("items 1-3/25");
+                r.Headers.GetValues(Microsoft.Net.Http.Headers.HeaderNames.ContentRange).Should().Contain(contentRangeValue);
               })
               .VerifyRestApiResult((r, _) =>
               {
@@ -332,10 +335,11 @@ public class HttpStepTests : HttpStepTestBase
                 r.Headers.Contains(Microsoft.Net.Http.Headers.HeaderNames.ContentType).Should().BeTrue();
                 r.Headers.GetValues(Microsoft.Net.Http.Headers.HeaderNames.ContentType)
                   .Should().Contain(MediaTypeNames.Application.Json);
+
                 r.Headers.Contains(Microsoft.Net.Http.Headers.HeaderNames.AcceptRanges).Should().BeTrue();
-                r.Headers.GetValues(Microsoft.Net.Http.Headers.HeaderNames.AcceptRanges).Should().Contain("items");
+                r.Headers.GetValues(Microsoft.Net.Http.Headers.HeaderNames.AcceptRanges).Should().Contain(acceptRangesValue);
                 r.Headers.Contains(Microsoft.Net.Http.Headers.HeaderNames.ContentRange).Should().BeTrue();
-                r.Headers.GetValues(Microsoft.Net.Http.Headers.HeaderNames.ContentRange).Should().Contain("items 1-3/25");
+                r.Headers.GetValues(Microsoft.Net.Http.Headers.HeaderNames.ContentRange).Should().Contain(contentRangeValue);
               })
           )
         )
@@ -369,7 +373,7 @@ public class HttpStepTests : HttpStepTestBase
 
     HttpClient httpClient = Server.CreateClient();
     Scenario<MonitoringHeartbeatScenarioData> scenario = Scenario
-        .New<MonitoringHeartbeatScenarioData>("[HttpSteapRunAllVerifiersWhenUsingDefaultModeEvenIfAllVerifiersSucceed]-")
+        .New<MonitoringHeartbeatScenarioData>("[HttpStepRunAllVerifiersWhenUsingDefaultModeEvenIfAllVerifiersSucceed]")
         .WithServices(s => s.AddExternalHttpClient(httpClient))
         .WithSteps(steps => steps
           .HttpStep("[Step-01]-GET-/users/1",
@@ -425,7 +429,7 @@ public class HttpStepTests : HttpStepTestBase
 
     HttpClient httpClient = Server.CreateClient();
     Scenario<MonitoringHeartbeatScenarioData> scenario = Scenario
-        .New<MonitoringHeartbeatScenarioData>("[HttpStepRunAllVerifiersWhenUsingVerifyAllModeEvenIfSomeVerifiersFail]-")
+        .New<MonitoringHeartbeatScenarioData>("[HttpStepRunAllVerifiersWhenUsingVerifyAllModeEvenIfSomeVerifiersFail]")
         .WithServices(s => s.AddExternalHttpClient(httpClient))
         .WithSteps(steps => steps
           .HttpStep("[Step-01]-GET-/users/1",
@@ -460,6 +464,89 @@ public class HttpStepTests : HttpStepTestBase
       ;
   }
 
+  [Test]
+  public async Task SingleStepScenario_Should_AllowNonRfcHeaders()
+  {
+    if (Server == null)
+    {
+      Assert.Fail("WireMockServer is null");
+      return;
+    }
+
+    // Arrange
+    const string acceptRangesValue = "500";
+    const string contentRangeValue = "1-3/25";
+    Server.SetUpGetUsers(acceptRanges: acceptRangesValue, contentRange: contentRangeValue);
+
+    HttpClient httpClient = Server.CreateClient();
+    Scenario<MonitoringHeartbeatScenarioData> scenario = Scenario
+        .New<MonitoringHeartbeatScenarioData>("[HttpStepAllowNonRfcHeaders]")
+        .WithServices(s => s.AddExternalHttpClient(httpClient))
+        .WithSteps(steps => steps
+          .HttpStep("[Step-01]-GET-/users",
+            () => RequestBuilder.Get().AppendPathSegment("users"),
+            step => step
+              .Verify((r, _) =>
+              {
+                r.Content.Should().NotBeNull();
+                r.Content.Headers.Should().NotBeNull();
+                r.Content.Headers.ContentType.Should().NotBeNull().And.Subject.ToString().Should()
+                  .Be(MediaTypeNames.Application.Json);
+
+                bool containsAcceptRangeHeader = r.Headers.NonValidated.TryGetValues(
+                  Microsoft.Net.Http.Headers.HeaderNames.AcceptRanges, out HeaderStringValues acceptRangesValues);
+
+                containsAcceptRangeHeader.Should().BeTrue();
+                acceptRangesValues.Should().Contain(acceptRangesValue);
+
+                bool containsContentRangeHeader = r.Content.Headers.NonValidated.TryGetValues(
+                  Microsoft.Net.Http.Headers.HeaderNames.ContentRange, out HeaderStringValues contentRangeValues);
+
+                containsContentRangeHeader.Should().BeTrue();
+                contentRangeValues.Should().Contain(contentRangeValue);
+              })
+              .VerifyJson((r, _) =>
+              {
+                r.Headers.Should().NotBeNull();
+                r.Headers.Contains(Microsoft.Net.Http.Headers.HeaderNames.ContentType).Should().BeTrue();
+                r.Headers.GetValues(Microsoft.Net.Http.Headers.HeaderNames.ContentType).Should()
+                  .Contain(MediaTypeNames.Application.Json);
+
+                r.Headers.Contains(Microsoft.Net.Http.Headers.HeaderNames.AcceptRanges).Should().BeTrue();
+                r.Headers.GetValues(Microsoft.Net.Http.Headers.HeaderNames.AcceptRanges).Should().Contain(acceptRangesValue);
+                r.Headers.Contains(Microsoft.Net.Http.Headers.HeaderNames.ContentRange).Should().BeTrue();
+                r.Headers.GetValues(Microsoft.Net.Http.Headers.HeaderNames.ContentRange).Should().Contain(contentRangeValue);
+              })
+              .VerifyRestApiResult((r, _) =>
+              {
+                r.Headers.Should().NotBeNull();
+                r.Headers.Contains(Microsoft.Net.Http.Headers.HeaderNames.ContentType).Should().BeTrue();
+                r.Headers.GetValues(Microsoft.Net.Http.Headers.HeaderNames.ContentType)
+                  .Should().Contain(MediaTypeNames.Application.Json);
+
+                r.Headers.Contains(Microsoft.Net.Http.Headers.HeaderNames.AcceptRanges).Should().BeTrue();
+                r.Headers.GetValues(Microsoft.Net.Http.Headers.HeaderNames.AcceptRanges).Should().Contain(acceptRangesValue);
+                r.Headers.Contains(Microsoft.Net.Http.Headers.HeaderNames.ContentRange).Should().BeTrue();
+                r.Headers.GetValues(Microsoft.Net.Http.Headers.HeaderNames.ContentRange).Should().Contain(contentRangeValue);
+              })
+          )
+        )
+        .Build()
+      ;
+
+    MonitoringHeartbeatScenarioData data = new();
+    // Act
+    using CancellationTokenSource cts = CreateDefaultScenarioCancellationTokenSource();
+    ConfirmStepResult<MonitoringHeartbeatScenarioData> confirmResult = await scenario.ConfirmSteps(data, cts.Token);
+
+    // Assert
+    confirmResult.Should().BeEquivalentTo(new
+    {
+      Status = ConfirmStatus.Success,
+      Exception = (Exception)null!,
+    });
+  }
+
   [TestCaseSource(nameof(VerifyTestData))]
   public async Task SingleGetStepScenario_Should_Failed_WhenVerifyFailed(VerifyTestCaseData testCaseData)
   {
@@ -481,7 +568,7 @@ public class HttpStepTests : HttpStepTestBase
 
     HttpClient httpClient = Server.CreateClient();
     Scenario<MonitoringHeartbeatScenarioData> scenario = Scenario
-        .New<MonitoringHeartbeatScenarioData>("[SingleGetStepScenario]-")
+        .New<MonitoringHeartbeatScenarioData>("[HttpStepScenarioFailedWhenVerifyFailed]")
         .WithServices(s => s.AddExternalHttpClient(httpClient))
         .WithSteps(steps => steps
           .HttpStep("[Step-01]-GET-/monitoring/heartbeat",
@@ -528,7 +615,7 @@ public class HttpStepTests : HttpStepTestBase
 
     HttpClient httpClient = Server.CreateClient();
     Scenario<MonitoringHeartbeatScenarioData> scenario = Scenario
-        .New<MonitoringHeartbeatScenarioData>("[SingleGetStepScenario]-")
+        .New<MonitoringHeartbeatScenarioData>("[HttpStepSucceed_WhenVerifySucceed]")
         .WithServices(s => s.AddExternalHttpClient(httpClient))
         .WithSteps(steps => steps
           .HttpStep("[Step-01]-GET-/monitoring/heartbeat",
