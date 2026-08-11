@@ -109,6 +109,11 @@ public sealed class Scenario<T> : IAsyncDisposable, IDisposable
     // Empty when nothing is registered, so a scenario without observers pays a single lookup.
     IReadOnlyList<IScenarioObserver<T>> observers = Services.GetServices<IScenarioObserver<T>>().ToList();
 
+    // Null when nothing is registered, which is the historical behaviour: skip what follows a
+    // failure. The policy decides whether the remaining steps still RUN, never the outcome.
+    IStepFailurePolicy<T>? failurePolicy = Services.GetService<IStepFailurePolicy<T>>();
+    bool runRemainingSteps = true;
+
     await Notify(observers, o => o.OnScenarioStarting(scenarioContext, nbSteps, cancellationToken))
       .ConfigureAwait(false);
 
@@ -120,7 +125,7 @@ public sealed class Scenario<T> : IAsyncDisposable, IDisposable
       await Notify(observers, o => o.OnStepStarting(scenarioContext, currentStep, i, cancellationToken))
         .ConfigureAwait(false);
 
-      if (scenarioStatus == ConfirmStatus.Success)
+      if (runRemainingSteps)
       {
         using IServiceScope scope = serviceScopeFactory.CreateScope();
         IServiceProvider serviceProvider = scope.ServiceProvider;
@@ -133,8 +138,18 @@ public sealed class Scenario<T> : IAsyncDisposable, IDisposable
           .GroupBy(kvp => kvp.Key, StringComparer.Ordinal)
           .ToDictionary(g => g.Key, g => g.First().Value, StringComparer.Ordinal);
 
-        scenarioStatus = stepResult.Status;
-        scenarioException = stepResult.Exception;
+        if (stepResult.Status != ConfirmStatus.Success && scenarioStatus == ConfirmStatus.Success)
+        {
+          // The FIRST step that does not succeed decides the scenario, and nothing running after it
+          // can overwrite that. Invisible while the run stops here, and the whole point once a
+          // policy lets it carry on: "a step fails, the scenario fails" must not depend on which
+          // steps happened to run afterwards.
+          scenarioStatus = stepResult.Status;
+          scenarioException = stepResult.Exception;
+
+          runRemainingSteps = failurePolicy?.OnStepFailed(scenarioContext, stepResult, i)
+                              == StepFailureAction.ContinueForObservation;
+        }
       }
       else
       {
