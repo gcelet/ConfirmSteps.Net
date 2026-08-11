@@ -137,6 +137,10 @@ public abstract class Step<T> : IStep<T>
     stepResult.State = StepState.Done;
     stepResult.Vars = stepContext.Vars;
 
+    // The profiler has been measuring every phase all along; surfacing its statistics is what turns
+    // them from an internal detail into something a caller can act on.
+    stepResult.Timings = stepProfiler.Stats;
+
     return stepResult;
   }
 

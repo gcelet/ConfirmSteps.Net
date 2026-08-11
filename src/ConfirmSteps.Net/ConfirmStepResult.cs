@@ -37,6 +37,20 @@ public sealed class ConfirmStepResult<T>
   public T Data { get; }
 
   /// <summary>
+  /// Gets the wall-clock time the scenario took.
+  /// </summary>
+  /// <remarks>
+  /// This is an init-only property rather than a constructor parameter on purpose: adding a
+  /// parameter would be a binary-breaking change for already-compiled callers.
+  /// </remarks>
+  public TimeSpan Duration { get; init; }
+
+  /// <summary>
+  /// Gets the moment the scenario started.
+  /// </summary>
+  public DateTimeOffset StartedAt { get; init; }
+
+  /// <summary>
   /// Gets the exception that caused the scenario to fail, if any.
   /// </summary>
   public Exception? Exception { get; }

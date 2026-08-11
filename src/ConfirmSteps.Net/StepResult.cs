@@ -1,5 +1,7 @@
 ﻿namespace ConfirmSteps;
 
+using ConfirmSteps.Steps;
+
 /// <summary>
 /// Represents the result of a single step execution.
 /// </summary>
@@ -7,6 +9,33 @@
 public sealed class StepResult<T>
   where T : class
 {
+  /// <summary>
+  /// Gets the total time spent in the step, across all of its phases.
+  /// </summary>
+  public TimeSpan Duration
+  {
+    get
+    {
+      TimeSpan total = TimeSpan.Zero;
+
+      for (int i = 0; i < Timings.Count; i++)
+      {
+        total += Timings[i].Elapsed;
+      }
+
+      return total;
+    }
+  }
+
+  /// <summary>
+  /// Gets or sets the time spent in each phase of the step: Prepare, Execute, Verify and Extract.
+  /// </summary>
+  /// <remarks>
+  /// Only the phases that actually ran are present: a step that fails during Execute has no Verify
+  /// nor Extract entry.
+  /// </remarks>
+  public IReadOnlyList<StepProfiler.StepSectionStat> Timings { get; set; } = [];
+
   /// <summary>
   /// Gets or sets the exception that occurred during step execution, if any.
   /// </summary>
