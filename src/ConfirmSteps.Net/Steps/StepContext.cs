@@ -4,9 +4,11 @@
 /// Provides contextual information for a step during its execution.
 /// </summary>
 /// <typeparam name="T">The type of the data object the scenario operates on.</typeparam>
-public sealed class StepContext<T>
+public sealed class StepContext<T> : IDisposable
     where T : class
 {
+    private bool disposed;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="StepContext{T}"/> class.
     /// </summary>
@@ -94,5 +96,40 @@ public sealed class StepContext<T>
         where TItem : class
     {
         return TryGetItem(typeof(TItem).FullName!, out item);
+    }
+
+    /// <summary>
+    /// Disposes every disposable item the step left behind, and clears the collection.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// HTTP steps park the request, the buffered response and its parsed form in
+    /// <see cref="Items"/>. Nothing releases them today, so the buffered body of every response
+    /// stays alive for as long as the <see cref="ConfirmStepResult{T}"/> does — a memory problem
+    /// that only shows up under load, and one that grows with the size of the payloads.
+    /// </para>
+    /// <para>
+    /// This is opt-in through <see cref="ScenarioRunOptions.DisposeStepItems"/> because a caller may
+    /// legitimately be holding on to a response beyond the step that produced it.
+    /// </para>
+    /// </remarks>
+    public void Dispose()
+    {
+        if (disposed)
+        {
+            return;
+        }
+
+        disposed = true;
+
+        foreach (object item in Items.Values)
+        {
+            if (item is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+        }
+
+        Items.Clear();
     }
 }
