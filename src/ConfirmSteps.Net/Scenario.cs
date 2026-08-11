@@ -29,20 +29,42 @@ public static class Scenario
 /// Represents a scenario consisting of multiple steps to be executed.
 /// </summary>
 /// <typeparam name="T">The type of the data object being processed.</typeparam>
-public sealed class Scenario<T>
+public sealed class Scenario<T> : IAsyncDisposable, IDisposable
   where T : class
 {
+  private readonly ServiceProviderOwnership ownership;
+  private bool disposed;
+
+  /// <summary>
+  /// Initializes a new instance of the <see cref="Scenario{T}"/> class over a service provider the
+  /// caller owns and disposes.
+  /// </summary>
+  /// <param name="title">The title of the scenario.</param>
+  /// <param name="steps">The list of steps to execute.</param>
+  /// <param name="services">The service provider for dependency injection.</param>
+  public Scenario(string title, IReadOnlyList<IStep<T>> steps, IServiceProvider services)
+    : this(title, steps, services, ServiceProviderOwnership.External)
+  {
+  }
+
   /// <summary>
   /// Initializes a new instance of the <see cref="Scenario{T}"/> class.
   /// </summary>
   /// <param name="title">The title of the scenario.</param>
   /// <param name="steps">The list of steps to execute.</param>
   /// <param name="services">The service provider for dependency injection.</param>
-  public Scenario(string title, IReadOnlyList<IStep<T>> steps, IServiceProvider services)
+  /// <param name="ownership">
+  /// Who is responsible for disposing <paramref name="services"/>. Only the builder passes
+  /// <see cref="ServiceProviderOwnership.Scenario"/>: a caller supplying their own container keeps
+  /// control of its lifetime, which is what makes this addition behaviourally safe.
+  /// </param>
+  public Scenario(string title, IReadOnlyList<IStep<T>> steps, IServiceProvider services,
+    ServiceProviderOwnership ownership)
   {
     Title = title;
     Steps = steps;
     Services = services;
+    this.ownership = ownership;
   }
 
   /// <summary>
@@ -50,7 +72,14 @@ public sealed class Scenario<T>
   /// </summary>
   public string Title { get; }
 
-  private IServiceProvider Services { get; }
+  /// <summary>
+  /// Gets the service provider backing the scenario.
+  /// </summary>
+  /// <remarks>
+  /// Exposed so a host can inspect or reuse the container it configured through
+  /// <see cref="IScenarioCustomizer{T}.WithServices"/>.
+  /// </remarks>
+  public IServiceProvider Services { get; }
 
   private IReadOnlyList<IStep<T>> Steps { get; }
 
@@ -119,6 +148,62 @@ public sealed class Scenario<T>
     };
 
     return result;
+  }
+
+  /// <summary>
+  /// Disposes the service provider the scenario owns.
+  /// </summary>
+  /// <remarks>
+  /// <see cref="ScenarioBuilder{T}"/> calls <c>BuildServiceProvider()</c>, and until now nothing
+  /// ever disposed the result. A process building many scenarios therefore accumulated containers
+  /// and every singleton they held — including the default <c>HttpClient</c> and its connection
+  /// pool. A scenario built over a caller-supplied provider disposes nothing.
+  /// </remarks>
+  /// <returns>A task that completes once the owned provider is disposed.</returns>
+  public async ValueTask DisposeAsync()
+  {
+    if (disposed)
+    {
+      return;
+    }
+
+    disposed = true;
+
+    if (ownership != ServiceProviderOwnership.Scenario)
+    {
+      return;
+    }
+
+    switch (Services)
+    {
+      case IAsyncDisposable asyncDisposable:
+      {
+        await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+        break;
+      }
+
+      case IDisposable disposable:
+      {
+        disposable.Dispose();
+        break;
+      }
+    }
+  }
+
+  /// <inheritdoc cref="DisposeAsync" />
+  public void Dispose()
+  {
+    if (disposed)
+    {
+      return;
+    }
+
+    disposed = true;
+
+    if (ownership == ServiceProviderOwnership.Scenario && Services is IDisposable disposable)
+    {
+      disposable.Dispose();
+    }
   }
 
   private static TimeSpan GetElapsedTime(long startTimestamp)
