@@ -8,7 +8,7 @@ using ConfirmSteps.Steps;
 /// <remarks>
 /// <para>
 /// Implementations are discovered through dependency injection: register one or several with
-/// <see cref="IScenarioCustomizer{T}.WithServices"/> and <see cref="Scenario{T}.ConfirmSteps"/>
+/// <see cref="IScenarioCustomizer{T}.WithServices"/> and <see cref="Scenario{T}.ConfirmSteps(T, CancellationToken)"/>
 /// will call them. Nothing else changes — the signature of <c>ConfirmSteps</c> is untouched and a
 /// scenario without observers pays nothing.
 /// </para>

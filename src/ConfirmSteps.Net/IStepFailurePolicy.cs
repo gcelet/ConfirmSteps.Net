@@ -16,10 +16,10 @@ using ConfirmSteps.Steps;
 /// <para>
 /// Discovered through dependency injection, like <see cref="IScenarioObserver{T}"/>: register one
 /// with <see cref="IScenarioCustomizer{T}.WithServices"/> and
-/// <see cref="Scenario{T}.ConfirmSteps"/> will consult it. Registering nothing keeps the historical
-/// behaviour, the signature of <c>ConfirmSteps</c> is untouched, and a scenario without a policy
-/// pays a single container lookup. Where several are registered, the last one wins, as dependency
-/// injection resolution dictates.
+/// <see cref="Scenario{T}.ConfirmSteps(T, CancellationToken)"/> will consult it. Registering
+/// nothing keeps the historical behaviour, the signature of <c>ConfirmSteps</c> is untouched, and a
+/// scenario without a policy pays a single container lookup. Where several are registered, the last
+/// one wins, as dependency injection resolution dictates.
 /// </para>
 /// <para>
 /// A functional test wants the default; a load harness wants

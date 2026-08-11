@@ -84,12 +84,28 @@ public sealed class Scenario<T> : IAsyncDisposable, IDisposable
   private IReadOnlyList<IStep<T>> Steps { get; }
 
   /// <summary>
-  /// Executes the scenario with the provided data.
+  /// Executes the scenario with the provided data, under the default run options.
   /// </summary>
   /// <param name="data">The initial data object.</param>
   /// <param name="cancellationToken">A cancellation token to cancel the execution.</param>
   /// <returns>A <see cref="ConfirmStepResult{T}"/> containing the results of the execution.</returns>
-  public async Task<ConfirmStepResult<T>> ConfirmSteps(T data, CancellationToken cancellationToken)
+  public Task<ConfirmStepResult<T>> ConfirmSteps(T data, CancellationToken cancellationToken)
+    => ConfirmSteps(data, ScenarioRunOptions.Default, cancellationToken);
+
+  /// <summary>
+  /// Executes the scenario with the provided data and run options.
+  /// </summary>
+  /// <remarks>
+  /// An overload rather than an optional parameter on the method above: adding a parameter would
+  /// change that method's signature, and callers already compiled against the assembly bind to the
+  /// exact one — they would fail at run time with a <c>MissingMethodException</c> until recompiled.
+  /// </remarks>
+  /// <param name="data">The initial data object.</param>
+  /// <param name="options">Host choices that apply to this execution.</param>
+  /// <param name="cancellationToken">A cancellation token to cancel the execution.</param>
+  /// <returns>A <see cref="ConfirmStepResult{T}"/> containing the results of the execution.</returns>
+  public async Task<ConfirmStepResult<T>> ConfirmSteps(T data, ScenarioRunOptions options,
+    CancellationToken cancellationToken)
   {
     DateTimeOffset startedAt = DateTimeOffset.UtcNow;
     long startTimestamp = Stopwatch.GetTimestamp();
@@ -153,6 +169,13 @@ public sealed class Scenario<T> : IAsyncDisposable, IDisposable
           runRemainingSteps = !stepResult.WasCancelled
                               && failurePolicy?.OnStepFailed(scenarioContext, stepResult, i)
                               == StepFailureAction.ContinueForObservation;
+        }
+
+        if (options.DisposeStepItems)
+        {
+          // Releases the buffered HTTP response the step parked in its context. Vars are copied out
+          // by the step, so nothing the result exposes depends on the items surviving.
+          stepContext.Dispose();
         }
       }
       else
