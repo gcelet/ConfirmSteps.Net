@@ -188,6 +188,47 @@ public class StrictTemplateRenderingTests : HttpStepTestBase
     }
 
     /// <summary>
+    /// An empty value is a value. Only a missing variable and a null one are refused: a query
+    /// parameter legitimately carries an empty string, and blocking the request over it would refuse
+    /// a request the server accepts.
+    /// </summary>
+    [Test]
+    public async Task AnEmptyValueShouldNotBlockTheRequest()
+    {
+        // Arrange
+        if (Server == null)
+        {
+            Assert.Fail("The stub server did not start.");
+
+            return;
+        }
+
+        Server.SetUpGetUsers();
+
+        using HttpClient httpClient = Server.CreateClient();
+        using Scenario<StrictData> scenario = Scenario.New<StrictData>("[Scenario-Strict-0005]")
+            .WithServices(s => s.AddExternalHttpClient(httpClient))
+            .WithGlobals(g => g.UseObject("SEARCH", _ => string.Empty))
+            .WithSteps(steps => steps
+                .HttpStep("[Step-01]-GET-/users",
+                    () => RequestBuilder.Get()
+                        .AppendPathSegment("users")
+                        .WithQueryString(q => q.Append("search", "{{SEARCH}}")),
+                    step => step.Verify((r, _) => r.IsSuccessStatusCode.Should().BeTrue())))
+            .Build();
+
+        using CancellationTokenSource cts = CreateDefaultScenarioCancellationTokenSource();
+
+        // Act
+        ConfirmStepResult<StrictData> result = await scenario.ConfirmSteps(new StrictData(), cts.Token);
+
+        // Assert
+        result.Status.Should().Be(ConfirmStatus.Success);
+        Server.LogEntries.Should().HaveCount(1);
+        Server.LogEntries.Single().RequestMessage.RawQuery.Should().Be("?search=");
+    }
+
+    /// <summary>
     /// A request whose variables all have values behaves exactly as before.
     /// </summary>
     [Test]
