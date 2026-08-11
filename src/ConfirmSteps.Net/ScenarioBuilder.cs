@@ -64,7 +64,9 @@ public sealed class ScenarioBuilder<T> : IScenarioCustomizer<T>, IScenarioBuilde
             steps.Add(step);
         }
 
-        Scenario<T> scenario = new(Title, steps, serviceProvider);
+        // The builder created this provider, so the scenario owns it and disposing the scenario
+        // releases it. A caller passing their own provider to the public constructor keeps control.
+        Scenario<T> scenario = new(Title, steps, serviceProvider, ServiceProviderOwnership.Scenario);
 
         return scenario;
     }
