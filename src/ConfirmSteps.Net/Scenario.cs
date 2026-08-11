@@ -106,10 +106,20 @@ public sealed class Scenario<T> : IAsyncDisposable, IDisposable
     List<StepResult<T>> stepResults = new();
     ConfirmStatus scenarioStatus = ConfirmStatus.Success;
 
+    // Empty when nothing is registered, so a scenario without observers pays a single lookup.
+    IReadOnlyList<IScenarioObserver<T>> observers = Services.GetServices<IScenarioObserver<T>>().ToList();
+
+    await Notify(observers, o => o.OnScenarioStarting(scenarioContext, nbSteps, cancellationToken))
+      .ConfigureAwait(false);
+
     for (int i = 0; i < nbSteps; i++)
     {
       IStep<T> currentStep = Steps[i];
       StepResult<T> stepResult;
+
+      await Notify(observers, o => o.OnStepStarting(scenarioContext, currentStep, i, cancellationToken))
+        .ConfigureAwait(false);
+
       if (scenarioStatus == ConfirmStatus.Success)
       {
         using IServiceScope scope = serviceScopeFactory.CreateScope();
@@ -137,6 +147,9 @@ public sealed class Scenario<T> : IAsyncDisposable, IDisposable
         };
       }
 
+      await Notify(observers, o => o.OnStepCompleted(scenarioContext, stepResult, i, cancellationToken))
+        .ConfigureAwait(false);
+
       stepResults.Add(stepResult);
     }
 
@@ -146,6 +159,8 @@ public sealed class Scenario<T> : IAsyncDisposable, IDisposable
       StartedAt = startedAt,
       Duration = GetElapsedTime(startTimestamp),
     };
+
+    await Notify(observers, o => o.OnScenarioCompleted(result, cancellationToken)).ConfigureAwait(false);
 
     return result;
   }
@@ -203,6 +218,32 @@ public sealed class Scenario<T> : IAsyncDisposable, IDisposable
     if (ownership == ServiceProviderOwnership.Scenario && Services is IDisposable disposable)
     {
       disposable.Dispose();
+    }
+  }
+
+  /// <summary>
+  /// Invokes every observer, swallowing whatever they throw.
+  /// </summary>
+  /// <remarks>
+  /// Observing must not change the outcome being observed. A dashboard that fails to paint a line
+  /// has no business turning a passing step into a failing one, and a caller reading the result
+  /// would have no way to tell the two apart.
+  /// </remarks>
+  private static async ValueTask Notify(IReadOnlyList<IScenarioObserver<T>> observers,
+    Func<IScenarioObserver<T>, ValueTask> notification)
+  {
+    for (int i = 0; i < observers.Count; i++)
+    {
+      try
+      {
+        await notification(observers[i]).ConfigureAwait(false);
+      }
+      catch (Exception exception)
+      {
+        // Reported to the debugger rather than rethrown: loud enough to be noticed while writing
+        // an observer, silent enough not to alter the run in production.
+        Debug.WriteLine($"Scenario observer threw and was ignored: {exception}");
+      }
     }
   }
 
