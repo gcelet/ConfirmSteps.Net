@@ -36,7 +36,12 @@ public class WaitStepBuilder<T> : IStepBuilder<T>
   /// <inheritdoc />
   IServiceCollection IStepBuilder<T>.RegisterServices(IServiceCollection services)
   {
-    services.TryAddSingleton(new Random());
+    // Registered as a singleton and resolved by every wait step, so it is shared across whatever
+    // concurrency the host applies. System.Random instance methods are not thread-safe, which made
+    // a single Scenario<T> unsafe to run from several threads at once — a wait step sits between
+    // every pair of steps, so the race was continuous rather than occasional.
+    // Random.Shared is thread-safe; TryAdd still lets a caller register their own instance.
+    services.TryAddSingleton(Random.Shared);
     return services;
   }
 }
