@@ -42,6 +42,16 @@ public sealed class StepResult<T>
   public Exception? Exception { get; set; }
 
   /// <summary>
+  /// Gets or sets a value indicating whether the step was interrupted by a cancellation the caller
+  /// requested, rather than by a failure of the system under test.
+  /// </summary>
+  /// <remarks>
+  /// Lets a host separate "I stopped this" from "this broke" without inspecting exception types —
+  /// the distinction that decides whether an error rate is real.
+  /// </remarks>
+  public bool WasCancelled { get; set; }
+
+  /// <summary>
   /// Gets or sets the state of the step.
   /// </summary>
   public StepState State { get; set; } = StepState.Idle;

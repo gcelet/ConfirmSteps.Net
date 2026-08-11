@@ -51,6 +51,17 @@ public sealed class ConfirmStepResult<T>
   public DateTimeOffset StartedAt { get; init; }
 
   /// <summary>
+  /// Gets a value indicating whether the run was interrupted by a cancellation the caller
+  /// requested.
+  /// </summary>
+  /// <remarks>
+  /// A cancelled run is not a failed run: nothing was proven about the system under test. Hosts
+  /// that stop gracefully should count these separately, or their error rate reports their own
+  /// shutdown.
+  /// </remarks>
+  public bool WasCancelled => stepResults.Exists(s => s.WasCancelled);
+
+  /// <summary>
   /// Gets the exception that caused the scenario to fail, if any.
   /// </summary>
   public Exception? Exception { get; }
