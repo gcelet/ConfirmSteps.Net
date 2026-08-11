@@ -147,7 +147,11 @@ public sealed class Scenario<T> : IAsyncDisposable, IDisposable
           scenarioStatus = stepResult.Status;
           scenarioException = stepResult.Exception;
 
-          runRemainingSteps = failurePolicy?.OnStepFailed(scenarioContext, stepResult, i)
+          // A cancellation the caller asked for always ends the run: carrying on would only produce
+          // more cancelled steps, and no host observes anything useful in them. The policy answers
+          // a different question — whether a FAILURE should end the run.
+          runRemainingSteps = !stepResult.WasCancelled
+                              && failurePolicy?.OnStepFailed(scenarioContext, stepResult, i)
                               == StepFailureAction.ContinueForObservation;
         }
       }

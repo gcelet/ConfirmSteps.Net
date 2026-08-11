@@ -73,6 +73,10 @@ public abstract class Step<T> : IStep<T>
       {
         stepResult.Status = await Prepare(stepContext, cancellationToken);
       }
+      catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+      {
+        MarkCancelled(stepResult);
+      }
       catch (Exception exception)
       {
         stepResult.Status = ConfirmStatus.Failure;
@@ -89,6 +93,10 @@ public abstract class Step<T> : IStep<T>
         try
         {
           stepResult.Status = await Execute(stepContext, cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+          MarkCancelled(stepResult);
         }
         catch (Exception exception)
         {
@@ -108,6 +116,10 @@ public abstract class Step<T> : IStep<T>
         {
           stepResult.Status = await Verify(stepContext, cancellationToken);
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+          MarkCancelled(stepResult);
+        }
         catch (Exception exception)
         {
           stepResult.Status = ConfirmStatus.Failure;
@@ -126,6 +138,10 @@ public abstract class Step<T> : IStep<T>
           stepResult.State = StepState.Extract;
           stepResult.Status = await Extract(stepContext, cancellationToken);
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+          MarkCancelled(stepResult);
+        }
         catch (Exception exception)
         {
           stepResult.Status = ConfirmStatus.Failure;
@@ -142,6 +158,27 @@ public abstract class Step<T> : IStep<T>
     stepResult.Timings = stepProfiler.Stats;
 
     return stepResult;
+  }
+
+  /// <summary>
+  /// Records a step interrupted by a cancellation the caller asked for.
+  /// </summary>
+  /// <remarks>
+  /// A cancelled step is neither a pass nor a failure: nothing was proven about the system under
+  /// test. Reporting it as <see cref="ConfirmStatus.Failure"/> — as every phase used to, since a
+  /// bare catch treated <see cref="OperationCanceledException"/> like any other exception — meant
+  /// any host that stops gracefully saw a burst of failures it had itself caused. Under load that
+  /// is indistinguishable from the system actually breaking.
+  /// <para>
+  /// The state reached is preserved rather than reset, so a reader can still see how far the step
+  /// got, and <see cref="StepResult{T}.WasCancelled"/> tells the two apart without parsing.
+  /// </para>
+  /// </remarks>
+  /// <param name="stepResult">The result being built.</param>
+  private static void MarkCancelled(StepResult<T> stepResult)
+  {
+    stepResult.Status = ConfirmStatus.Indecisive;
+    stepResult.WasCancelled = true;
   }
 
   /// <summary>
