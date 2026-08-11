@@ -3,6 +3,7 @@
 using System.Collections;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Web;
 
 using ConfirmSteps.Templating;
@@ -12,6 +13,8 @@ using ConfirmSteps.Templating;
 /// </summary>
 public sealed class RequestBuilder : IHttpRequestMessageConverter
 {
+    private const string MediaTypeJson = "application/json";
+
     private RequestBuilder(HttpMethod method, TemplateString? baseUrl = null)
     {
         Method = method;
@@ -102,6 +105,8 @@ public sealed class RequestBuilder : IHttpRequestMessageConverter
 
     private TemplateString? Body { get; set; }
 
+    private JsonNode? JsonBody { get; set; }
+
     private TemplateString? Fragment { get; set; }
 
     private Dictionary<TemplateString, TemplateString> Headers { get; } = new();
@@ -146,7 +151,50 @@ public sealed class RequestBuilder : IHttpRequestMessageConverter
     /// <returns>The current <see cref="RequestBuilder"/> for fluent chaining.</returns>
     public RequestBuilder WithBody(TemplateString body)
     {
+        if (JsonBody != null)
+        {
+            throw new InvalidOperationException(
+                "The request already has a JSON body. A request has one body: use either "
+                + $"{nameof(WithBody)} or {nameof(WithJsonBody)}.");
+        }
+
         Body = body;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the request body from a JSON structure whose string values may be placeholders.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The alternative to <see cref="WithBody(TemplateString)"/>, and the one to prefer whenever the
+    /// body is JSON. The document is <b>built and serialised</b> rather than assembled as text, so
+    /// escaping is guaranteed by the serialiser instead of by whoever wrote the template: a value
+    /// carrying a quote or a newline cannot break the document, nor inject one.
+    /// </para>
+    /// <para>
+    /// A string value that is exactly one placeholder takes the <b>type of its variable</b> — a number
+    /// stays a number, a collection becomes an array — which is what a text template cannot express.
+    /// The quotes around it are how a placeholder is written inside JSON, not a claim that the result
+    /// is a string.
+    /// </para>
+    /// <para>
+    /// The template is a plain <see cref="JsonNode"/>, so a body read out of a step description passes
+    /// through untouched, with no intermediate shape to define or map.
+    /// </para>
+    /// </remarks>
+    /// <param name="body">The body template.</param>
+    /// <returns>The current <see cref="RequestBuilder"/> for fluent chaining.</returns>
+    public RequestBuilder WithJsonBody(JsonNode body)
+    {
+        if (Body != null)
+        {
+            throw new InvalidOperationException(
+                "The request already has a text body. A request has one body: use either "
+                + $"{nameof(WithBody)} or {nameof(WithJsonBody)}.");
+        }
+
+        JsonBody = body;
         return this;
     }
 
@@ -311,14 +359,48 @@ public sealed class RequestBuilder : IHttpRequestMessageConverter
         Check(Body, "body");
         Check(Fragment, "fragment");
 
+        // Walked node by node, so a missing variable is reported with its place in the document.
+        JsonBodyTemplate.CollectUnresolved(JsonBody, vars, "$", unresolved);
+
         if (unresolved.Count > 0)
         {
             throw new UnresolvedTemplateVariableException(unresolved);
         }
     }
 
+    /// <summary>
+    /// Serialises the rendered JSON body, defaulting its content type to <c>application/json</c>.
+    /// </summary>
+    /// <remarks>
+    /// An explicit Content-Type header still wins: a body may be JSON and be declared as a more
+    /// specific media type, a problem document or a vendor type among them.
+    /// </remarks>
+    private HttpContent? ToJsonRequestBody(IReadOnlyDictionary<string, object> vars)
+    {
+        JsonNode? rendered = JsonBodyTemplate.Render(JsonBody, vars);
+
+        if (rendered == null)
+        {
+            return null;
+        }
+
+        string contentType = Headers.TryGetValue(HeaderNames.ContentType,
+            out TemplateString? headerContentType) && headerContentType != null
+            ? headerContentType.Render(vars)
+            : MediaTypeJson;
+
+        StringContent stringContent = new(rendered.ToJsonString(), Encoding.UTF8, contentType);
+
+        return stringContent;
+    }
+
     private HttpContent? ToRequestBody(IReadOnlyDictionary<string, object> vars)
     {
+        if (JsonBody != null)
+        {
+            return ToJsonRequestBody(vars);
+        }
+
         if (Body == null)
         {
             return null;
