@@ -1,6 +1,7 @@
 ﻿namespace ConfirmSteps.Steps.Http.RequestBuilding;
 
 using System.Collections;
+using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json.Nodes;
@@ -491,10 +492,16 @@ public sealed class RequestBuilder : IHttpRequestMessageConverter
             return [template.Render(vars)];
         }
 
-        // ToString on each element rather than the collection: a single value and an element of a
-        // collection must render identically, or a run varying the count would also change the format.
+        // Each element on its own rather than the collection, and invariantly: a number extracted from
+        // a response and sent back must read the same whatever the machine's culture, or a decimal
+        // leaves as 1,5 and the server rejects a request that looked right locally.
         return values.Cast<object?>()
-            .Select(v => v?.ToString() ?? string.Empty)
+            .Select(v => v switch
+            {
+                null => string.Empty,
+                IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
+                _ => v.ToString() ?? string.Empty,
+            })
             .ToList();
     }
 
