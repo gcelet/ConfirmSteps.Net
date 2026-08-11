@@ -1,5 +1,6 @@
 ﻿namespace ConfirmSteps.Steps.Http.RequestBuilding;
 
+using System.Collections;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Web;
@@ -352,6 +353,22 @@ public sealed class RequestBuilder : IHttpRequestMessageConverter
         return fragment;
     }
 
+    /// <summary>
+    /// Builds the query string, repeating a parameter whose variable carries several values.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A parameter declared once can go out several times: <c>modelIds={{MODEL_IDS}}</c> becomes
+    /// <c>modelIds=1&amp;modelIds=2&amp;modelIds=3</c> when the variable holds three values. The count
+    /// is therefore a property of the <b>data</b>, not of the request — which is what allows a run to
+    /// vary it, say to measure what asking for thirty identifiers costs against five, without
+    /// touching the description of the step.
+    /// </para>
+    /// <para>
+    /// An empty collection produces no parameter at all. This is the only case in which a declared
+    /// parameter disappears; a single value, empty string included, always produces one.
+    /// </para>
+    /// </remarks>
     private string ToRequestQueryString(IReadOnlyDictionary<string, object> vars)
     {
         if (QueryString.Count == 0)
@@ -361,23 +378,78 @@ public sealed class RequestBuilder : IHttpRequestMessageConverter
 
         StringBuilder sb = new();
 
-        for (int i = 0; i < QueryString.Count; i++)
+        foreach (KeyValuePair<TemplateString, TemplateString> queryStringParameter in QueryString)
         {
-            if (i > 0)
-            {
-                sb.Append('&');
-            }
-
-            KeyValuePair<TemplateString, TemplateString> queryStringParameter = QueryString[i];
             string key = HttpUtility.UrlEncode(queryStringParameter.Key.Render(vars), Encoding.UTF8);
-            string value = HttpUtility.UrlEncode(queryStringParameter.Value.Render(vars), Encoding.UTF8);
 
-            sb.Append(key).Append('=').Append(value);
+            foreach (string value in RenderQueryValues(queryStringParameter.Value, vars))
+            {
+                if (sb.Length > 0)
+                {
+                    sb.Append('&');
+                }
+
+                sb.Append(key).Append('=').Append(HttpUtility.UrlEncode(value, Encoding.UTF8));
+            }
         }
 
         string queryString = sb.ToString();
 
         return queryString;
+    }
+
+    /// <summary>
+    /// The values one declared query parameter contributes: one, several, or none.
+    /// </summary>
+    private static IEnumerable<string> RenderQueryValues(TemplateString template,
+        IReadOnlyDictionary<string, object> vars)
+    {
+        if (!TryGetMultiValued(template, vars, out IEnumerable? values) || values is null)
+        {
+            return [template.Render(vars)];
+        }
+
+        // ToString on each element rather than the collection: a single value and an element of a
+        // collection must render identically, or a run varying the count would also change the format.
+        return values.Cast<object?>()
+            .Select(v => v?.ToString() ?? string.Empty)
+            .ToList();
+    }
+
+    /// <summary>
+    /// Whether the template stands for a variable that carries several values.
+    /// </summary>
+    /// <remarks>
+    /// Only a template that is one placeholder and nothing else can: text built around a placeholder
+    /// has no meaningful reading of a list. A string is not treated as a collection of characters, and
+    /// a collection used inside surrounding text is refused rather than rendered as its type name,
+    /// which is what it used to produce.
+    /// </remarks>
+    private static bool TryGetMultiValued(TemplateString template,
+        IReadOnlyDictionary<string, object> vars, out IEnumerable? values)
+    {
+        values = null;
+
+        if (template.ParameterNames.Count != 1)
+        {
+            return false;
+        }
+
+        if (!vars.TryGetValue(template.ParameterNames[0], out object? value)
+            || value is null or string
+            || value is not IEnumerable enumerable)
+        {
+            return false;
+        }
+
+        if (!template.IsSinglePlaceholder)
+        {
+            throw new MultiValuedTemplateVariableException(template.ParameterNames[0]);
+        }
+
+        values = enumerable;
+
+        return true;
     }
 
     private Uri ToRequestUri(Uri? baseAddress, IReadOnlyDictionary<string, object> vars)
