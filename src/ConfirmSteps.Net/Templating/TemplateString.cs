@@ -11,6 +11,9 @@ public sealed class TemplateString : IEquatable<TemplateString>
     private static readonly Regex ExtractParamNames = new(@"{{\s*(?<paramName>[\w]+)\s*}}",
         RegexOptions.ExplicitCapture | RegexOptions.Compiled);
 
+    private static readonly Regex SinglePlaceholder = new(@"^{{\s*[\w]+\s*}}$",
+        RegexOptions.ExplicitCapture | RegexOptions.Compiled);
+
     private IReadOnlyList<string>? parameterNames;
 
     /// <summary>
@@ -75,6 +78,17 @@ public sealed class TemplateString : IEquatable<TemplateString>
     /// reported together instead of one per attempt.
     /// </remarks>
     public IReadOnlyList<string> ParameterNames => parameterNames ??= ExtractParameterNames(Template);
+
+    /// <summary>
+    /// Gets a value indicating whether the template is one placeholder and nothing else.
+    /// </summary>
+    /// <remarks>
+    /// Such a template stands for a value rather than for text built around one, which is what makes
+    /// it able to carry something other than a string — a list, for instance. <c>{{MODEL_IDS}}</c> is
+    /// one; <c>ids-{{MODEL_IDS}}</c> is not, and could only ever produce text.
+    /// </remarks>
+    public bool IsSinglePlaceholder =>
+        ParameterNames.Count == 1 && SinglePlaceholder.IsMatch(Template);
 
     private string Template { get; }
 
