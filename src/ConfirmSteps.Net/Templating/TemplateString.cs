@@ -11,6 +11,8 @@ public sealed class TemplateString : IEquatable<TemplateString>
     private static readonly Regex ExtractParamNames = new(@"{{\s*(?<paramName>[\w]+)\s*}}",
         RegexOptions.ExplicitCapture | RegexOptions.Compiled);
 
+    private IReadOnlyList<string>? parameterNames;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="TemplateString"/> class.
     /// </summary>
@@ -63,7 +65,35 @@ public sealed class TemplateString : IEquatable<TemplateString>
         return !Equals(left, right);
     }
 
+    /// <summary>
+    /// Gets the names of the variables this template expects, in order of first appearance.
+    /// </summary>
+    /// <remarks>
+    /// Readable without rendering anything, which is what lets a caller answer "what does this
+    /// consume?" before a run rather than discovering it from a request that went out wrong. It is
+    /// also what makes a strict render possible: the names that are missing from the variables can be
+    /// reported together instead of one per attempt.
+    /// </remarks>
+    public IReadOnlyList<string> ParameterNames => parameterNames ??= ExtractParameterNames(Template);
+
     private string Template { get; }
+
+    private static IReadOnlyList<string> ExtractParameterNames(string template)
+    {
+        List<string> names = new();
+
+        for (Match match = ExtractParamNames.Match(template); match.Success; match = match.NextMatch())
+        {
+            string name = match.Groups["paramName"].Value;
+
+            if (!names.Contains(name, StringComparer.Ordinal))
+            {
+                names.Add(name);
+            }
+        }
+
+        return names;
+    }
 
     /// <inheritdoc />
     public bool Equals(TemplateString? other)

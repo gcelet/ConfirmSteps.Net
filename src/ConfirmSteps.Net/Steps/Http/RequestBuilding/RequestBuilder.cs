@@ -235,6 +235,8 @@ public sealed class RequestBuilder : IHttpRequestMessageConverter
     HttpRequestMessage IHttpRequestMessageConverter.ToHttpRequestMessageConverter(Uri? baseAddress,
         IReadOnlyDictionary<string, object> vars)
     {
+        EnsureEveryVariableResolved(vars);
+
         HttpRequestMessage httpRequestMessage = new()
         {
             Method = Method,
@@ -245,6 +247,73 @@ public sealed class RequestBuilder : IHttpRequestMessageConverter
         AddHeaders(httpRequestMessage, vars);
 
         return httpRequestMessage;
+    }
+
+    /// <summary>
+    /// Refuses to build a request whose templates expect a variable that has no value.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Rendering leaves an unknown placeholder in place, which suits a report and not a request: the
+    /// placeholder would go out url-encoded and come back as a 400 or a 404, reported as the system
+    /// under test misbehaving rather than as the broken correlation chain it is.
+    /// </para>
+    /// <para>
+    /// Checked in one pass over every template the request carries, so all the missing variables are
+    /// named at once. A variable present but null counts as missing, which is what rendering already
+    /// does with it.
+    /// </para>
+    /// </remarks>
+    private void EnsureEveryVariableResolved(IReadOnlyDictionary<string, object> vars)
+    {
+        List<UnresolvedTemplateVariable> unresolved = new();
+
+        void Check(TemplateString? template, string location)
+        {
+            if (template == null)
+            {
+                return;
+            }
+
+            foreach (string name in template.ParameterNames)
+            {
+                if (!vars.TryGetValue(name, out object? value) || value == null)
+                {
+                    unresolved.Add(new UnresolvedTemplateVariable(name, location));
+                }
+            }
+        }
+
+        Check(BaseUrl, "base url");
+
+        for (int i = 0; i < PathSegments.Count; i++)
+        {
+            Check(PathSegments[i], $"path segment {i + 1}");
+        }
+
+        foreach (KeyValuePair<TemplateString, TemplateString> parameter in QueryString)
+        {
+            string name = parameter.Key.Render(vars);
+
+            Check(parameter.Key, "a query parameter name");
+            Check(parameter.Value, $"query '{name}'");
+        }
+
+        foreach (KeyValuePair<TemplateString, TemplateString> header in Headers)
+        {
+            string name = header.Key.Render(vars);
+
+            Check(header.Key, "a header name");
+            Check(header.Value, $"header '{name}'");
+        }
+
+        Check(Body, "body");
+        Check(Fragment, "fragment");
+
+        if (unresolved.Count > 0)
+        {
+            throw new UnresolvedTemplateVariableException(unresolved);
+        }
     }
 
     private HttpContent? ToRequestBody(IReadOnlyDictionary<string, object> vars)
