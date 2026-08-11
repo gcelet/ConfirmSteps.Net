@@ -1,5 +1,7 @@
 ﻿namespace ConfirmSteps;
 
+using System.Diagnostics;
+
 using ConfirmSteps.Data;
 using ConfirmSteps.Steps;
 
@@ -60,6 +62,8 @@ public sealed class Scenario<T>
   /// <returns>A <see cref="ConfirmStepResult{T}"/> containing the results of the execution.</returns>
   public async Task<ConfirmStepResult<T>> ConfirmSteps(T data, CancellationToken cancellationToken)
   {
+    DateTimeOffset startedAt = DateTimeOffset.UtcNow;
+    long startTimestamp = Stopwatch.GetTimestamp();
     int nbSteps = Steps.Count;
     VarManager<T> varManager = Services.GetRequiredService<VarManager<T>>();
     IReadOnlyDictionary<string, object> globalVars = varManager.Extract(data);
@@ -108,8 +112,23 @@ public sealed class Scenario<T>
     }
 
     ConfirmStepResult<T> result = new(Title, scenarioStatus, stepResults, scenarioContext.Data,
-      new Dictionary<string, object>(scenarioContext.Vars, StringComparer.Ordinal), scenarioException);
+      new Dictionary<string, object>(scenarioContext.Vars, StringComparer.Ordinal), scenarioException)
+    {
+      StartedAt = startedAt,
+      Duration = GetElapsedTime(startTimestamp),
+    };
 
     return result;
+  }
+
+  private static TimeSpan GetElapsedTime(long startTimestamp)
+  {
+#if NET7_0_OR_GREATER
+    return Stopwatch.GetElapsedTime(startTimestamp);
+#else
+    long elapsed = Stopwatch.GetTimestamp() - startTimestamp;
+
+    return TimeSpan.FromTicks((long)(elapsed * (TimeSpan.TicksPerSecond / (double)Stopwatch.Frequency)));
+#endif
   }
 }
