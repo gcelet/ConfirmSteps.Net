@@ -1,6 +1,7 @@
 namespace ConfirmSteps.Steps.Http.Json;
 
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 using ConfirmSteps.Steps.Http.RequestBuilding;
@@ -96,12 +97,31 @@ public sealed class HttpStepDescription
     public static HttpStepDescription LoadFromFile(string path)
     {
         string content = File.ReadAllText(path, Encoding.UTF8);
-        JsonNode? document = JsonNode.Parse(content);
+        JsonNode? document = Parse(content);
 
         return document == null
             ? throw HttpStepDescriptionException.Invalid(path, "the document is empty")
             : FromJson(document);
     }
+
+    /// <summary>
+    /// Parses a description, allowing what a hand-edited file needs.
+    /// </summary>
+    /// <remarks>
+    /// Comments and a trailing comma are accepted, because a description is a document somebody writes
+    /// and comes back to: refusing a comment would push every explanation into a property the library
+    /// then has to ignore. Serialisation cannot emit them, which is exactly why reading them matters.
+    /// </remarks>
+    /// <param name="json">The description document.</param>
+    public static JsonNode? Parse(string json)
+        => JsonNode.Parse(
+            json,
+            nodeOptions: null,
+            documentOptions: new JsonDocumentOptions
+            {
+                CommentHandling = JsonCommentHandling.Skip,
+                AllowTrailingCommas = true,
+            });
 
     /// <summary>Builds the request the description declares, against its own root if it names one.</summary>
     public RequestBuilder BuildRequest() => BuildRequest(null);
