@@ -103,12 +103,25 @@ public sealed class HttpStepDescription
             : FromJson(document);
     }
 
-    /// <summary>Builds the request the description declares.</summary>
-    public RequestBuilder BuildRequest()
+    /// <summary>Builds the request the description declares, against its own root if it names one.</summary>
+    public RequestBuilder BuildRequest() => BuildRequest(null);
+
+    /// <summary>
+    /// Builds the request the description declares, against a root the host supplies.
+    /// </summary>
+    /// <remarks>
+    /// A description describes a <b>path</b>, not a host: the same one is meant to be played against a
+    /// local server, a staging one and production, so the root belongs to whoever knows which
+    /// environment is being exercised. A description may still name its own <c>baseUrl</c> — for an
+    /// endpoint that genuinely lives elsewhere — and then it wins over what is passed here. With
+    /// neither, the request is relative and the <c>HttpClient</c>'s own base address applies.
+    /// </remarks>
+    /// <param name="baseUrl">Root to build against, itself possibly a template.</param>
+    public RequestBuilder BuildRequest(Templating.TemplateString? baseUrl)
     {
         JsonObject request = (JsonObject)Document["request"]!;
         RequestBuilder builder = ForMethod(ReadString(request, "method") ?? "GET",
-            ReadString(request, "baseUrl"));
+            ReadString(request, "baseUrl"), baseUrl);
 
         if (ReadString(request, "path") is { Length: > 0 } path)
         {
@@ -256,10 +269,15 @@ public sealed class HttpStepDescription
                 ? parsed
                 : throw HttpStepDescriptionException.UnknownExtractionKind(kind);
 
-    private static RequestBuilder ForMethod(string method, string? baseUrl)
+    private static RequestBuilder ForMethod(string method, string? declaredBaseUrl,
+        Templating.TemplateString? suppliedBaseUrl)
     {
-        Templating.TemplateString? root =
-            baseUrl is { Length: > 0 } ? new Templating.TemplateString(baseUrl) : null;
+        // What the description names wins: it is the case of an endpoint that genuinely lives
+        // elsewhere, and the host cannot know that. Otherwise the host's root, which knows the
+        // environment; and with neither, the HttpClient's own base address.
+        Templating.TemplateString? root = declaredBaseUrl is { Length: > 0 }
+            ? new Templating.TemplateString(declaredBaseUrl)
+            : suppliedBaseUrl;
 
         return method.ToUpperInvariant() switch
         {
