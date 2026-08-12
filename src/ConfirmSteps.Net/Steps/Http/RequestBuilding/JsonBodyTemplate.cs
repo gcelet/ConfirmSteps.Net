@@ -54,6 +54,18 @@ internal static class JsonBodyTemplate
 
                 foreach (KeyValuePair<string, JsonNode?> property in templateObject)
                 {
+                    if (OptionalPropertyName(property.Key) is { } name)
+                    {
+                        // Absent means ABSENT: the property is left out of the document rather than
+                        // sent empty or null. For many endpoints those are three different requests.
+                        if (HasEveryVariable(property.Value, vars))
+                        {
+                            rendered[name] = Render(property.Value, vars);
+                        }
+
+                        continue;
+                    }
+
                     rendered[property.Key] = Render(property.Value, vars);
                 }
 
@@ -99,6 +111,13 @@ internal static class JsonBodyTemplate
             {
                 foreach (KeyValuePair<string, JsonNode?> property in templateObject)
                 {
+                    // An optional property has nothing to report: not having a value is what it is
+                    // for, and it will simply not be part of the document.
+                    if (OptionalPropertyName(property.Key) is not null)
+                    {
+                        continue;
+                    }
+
                     CollectUnresolved(property.Value, vars, $"{path}.{property.Key}", unresolved);
                 }
 
@@ -167,6 +186,34 @@ internal static class JsonBodyTemplate
         return bound == null
             ? null
             : JsonSerializer.SerializeToNode(bound, HttpSettings.BuildJsonSerializerOptions());
+    }
+
+    /// <summary>
+    /// Whether a property is declared optional, and its name without the marker.
+    /// </summary>
+    /// <remarks>
+    /// A trailing question mark on the <b>key</b> — <c>"searchText?"</c> — reads the way an optional
+    /// member reads in TypeScript, which is where the people writing these documents see it every day.
+    /// It also keeps the template plain JSON: no reserved object shape to learn, and nothing to change
+    /// in the templating engine, which the reporting templates share.
+    /// </remarks>
+    private static string? OptionalPropertyName(string key)
+        => key.Length > 1 && key[^1] == '?' ? key[..^1] : null;
+
+    /// <summary>
+    /// Whether every variable a template node expects has a value.
+    /// </summary>
+    /// <remarks>
+    /// What decides whether an optional property is part of the document. A node built from several
+    /// placeholders needs all of them: half a sentence is not a value worth sending.
+    /// </remarks>
+    private static bool HasEveryVariable(JsonNode? template, IReadOnlyDictionary<string, object> vars)
+    {
+        List<UnresolvedTemplateVariable> unresolved = new();
+
+        CollectUnresolved(template, vars, "$", unresolved);
+
+        return unresolved.Count == 0;
     }
 
     private static bool TryReadTemplate(JsonValue value, out TemplateString asTemplate)

@@ -92,6 +92,68 @@ public class JsonBodyTemplateTests : HttpStepTestBase
         }
     }
 
+    /// <summary>
+    /// Three different requests, and an endpoint that reads them as three: a property left out, a
+    /// property sent as null, and a property with a value. A template could express the last two;
+    /// leaving one out is what this adds, and it is what drives the behaviour of a search endpoint.
+    /// </summary>
+    [Test]
+    public async Task AnOptionalPropertyShouldBeLeftOutWhenItsVariableHasNoValue()
+    {
+        // Arrange
+        JsonObject body = await SendBody(
+            new JsonObject
+            {
+                ["searchText?"] = "{{SEARCH}}",
+                ["vehicleId?"] = "{{VEHICLE_ID}}",
+                ["sortType"] = "BY_STOCK",
+                ["explicitlyNull"] = null,
+            },
+            g => g.UseObject("SEARCH", _ => "frein"));
+
+        // Assert
+        body["searchText"]!.GetValue<string>().Should().Be("frein");
+        body.Should().NotContainKey("vehicleId");
+        body.Should().NotContainKey("vehicleId?");
+        body["sortType"]!.GetValue<string>().Should().Be("BY_STOCK");
+        body.Should().ContainKey("explicitlyNull");
+        body["explicitlyNull"].Should().BeNull();
+    }
+
+    /// <summary>
+    /// An empty value is still a value, here as everywhere: it is sent, because the endpoint reads an
+    /// empty search text and no search text differently.
+    /// </summary>
+    [Test]
+    public async Task AnOptionalPropertyWithAnEmptyValueShouldStillBeSent()
+    {
+        // Arrange
+        JsonObject body = await SendBody(
+            new JsonObject { ["searchText?"] = "{{SEARCH}}" },
+            g => g.UseObject("SEARCH", _ => string.Empty));
+
+        // Assert
+        body.Should().ContainKey("searchText");
+        body["searchText"]!.GetValue<string>().Should().BeEmpty();
+    }
+
+    /// <summary>
+    /// A missing variable in an optional property is not a failure: not having a value is what the
+    /// marker is for. A required one still refuses to build the request.
+    /// </summary>
+    [Test]
+    public async Task AnOptionalPropertyShouldNotFailTheRequest()
+    {
+        // Arrange
+        JsonObject body = await SendBody(
+            new JsonObject { ["searchText?"] = "{{NEVER_SET}}", ["page"] = 1 },
+            _ => { });
+
+        // Assert
+        body.Should().NotContainKey("searchText");
+        body["page"]!.GetValue<int>().Should().Be(1);
+    }
+
     [Test]
     public async Task ACollectionShouldBecomeAnArray()
     {
