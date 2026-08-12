@@ -274,6 +274,51 @@ public class HttpStepDescriptionTests : HttpStepTestBase
             .WithMessage("*statusCode*").WithMessage("*status*");
     }
 
+    /// <summary>
+    /// A description describes a path, not a host: the same one is played against a local server, a
+    /// staging one and production, so the root comes from whoever knows which is being exercised — and
+    /// may itself be a template, resolved per iteration.
+    /// </summary>
+    [Test]
+    public async Task TheHostShouldBeAbleToSupplyTheRootADescriptionDoesNotName()
+    {
+        // Arrange
+        if (Server == null)
+        {
+            Assert.Fail("The stub server did not start.");
+
+            return;
+        }
+
+        Server
+            .Given(Request.Create().WithPath("/api/configuration").UsingGet())
+            .RespondWith(Response.Create().WithStatusCode(HttpStatusCode.OK));
+
+        HttpStepDescription description = HttpStepDescription.FromJson(JsonNode.Parse("""
+            { "id": "configuration", "request": { "method": "GET", "path": "api/configuration" } }
+            """)!);
+
+        // No base address on the client: the root can only come from the variable below.
+        using HttpClient httpClient = new();
+        using Scenario<CatalogData> scenario = Scenario.New<CatalogData>("[Scenario-Root]")
+            .WithServices(s => s.AddExternalHttpClient(httpClient))
+            .WithGlobals(g => g.UseObject("url", _ => Server.Url!))
+            .WithSteps(steps => steps
+                .HttpStep("[Step-01]-configuration",
+                    () => description.BuildRequest("{{url}}"),
+                    step => description.Apply(step, StatusRegistry())))
+            .Build();
+
+        using CancellationTokenSource cts = CreateDefaultScenarioCancellationTokenSource();
+
+        // Act
+        ConfirmStepResult<CatalogData> result = await scenario.ConfirmSteps(new CatalogData(), cts.Token);
+
+        // Assert
+        result.Status.Should().Be(ConfirmStatus.Success);
+        Server.LogEntries.Single().RequestMessage.Path.Should().Be("/api/configuration");
+    }
+
     [Test]
     public void ADescriptionWithoutARequestShouldBeRefused()
     {
