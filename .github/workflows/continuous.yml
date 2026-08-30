@@ -34,6 +34,9 @@ jobs:
   ubuntu:
     name: continuous-integration-ubuntu
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v6
         with:
@@ -58,10 +61,15 @@ jobs:
           package-type: runtime # Use 'aspnetcore-runtime' if you need ASP.NET Core specifically
       - name: 'Run: ensure build.cmd script to be executable'
         run: chmod +x ./build.cmd
+      - name: NuGet login (OIDC)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
       - name: 'Run: ContinuousIntegration'
         run: ./build.cmd ContinuousIntegration
         env:
-          NuGetApiKey: ${{ secrets.NUGET_API_KEY }}
+          NuGetApiKey: ${{ steps.login.outputs.NUGET_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       - name: 'Publish: ConfirmSteps.Net build artefacts'
