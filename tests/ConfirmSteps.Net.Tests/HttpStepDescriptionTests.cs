@@ -10,6 +10,7 @@ using ConfirmSteps.Steps.Http.Json;
 
 using static CancellationExtensions;
 
+using WireMock;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 
@@ -107,7 +108,7 @@ public class HttpStepDescriptionTests : HttpStepTestBase
         result.StepResults[1].Title.Should().Be("vehicles.models.search");
 
         string expected = string.Join("&", modelIds.Select(id => $"modelIds={id}"));
-        Server.LogEntries.Last().RequestMessage.RawQuery.Should().Be("?" + expected);
+        Server.ShouldHaveLastRequest().RawQuery.Should().Be("?" + expected);
     }
 
     /// <summary>
@@ -155,9 +156,8 @@ public class HttpStepDescriptionTests : HttpStepTestBase
 
         // Assert
         result.Status.Should().Be(ConfirmStatus.Failure);
-        result.StepResults[0].Exception.Should().BeOfType<RequiredExtractionFailedException>();
-        ((RequiredExtractionFailedException)result.StepResults[0].Exception!).VariableName
-            .Should().Be("MODEL_IDS");
+        result.StepResults[0].Exception.Should().BeOfType<RequiredExtractionFailedException>()
+            .Which.VariableName.Should().Be("MODEL_IDS");
     }
 
     /// <summary>
@@ -245,7 +245,8 @@ public class HttpStepDescriptionTests : HttpStepTestBase
 
         // Assert
         result.Status.Should().Be(ConfirmStatus.Failure);
-        result.StepResults[0].Exception!.Message.Should().Contain("500").And.Contain("200");
+        result.StepResults[0].Exception.Should().BeOfType<InvalidOperationException>()
+            .Which.Message.Should().Contain("500").And.Contain("200");
     }
 
     /// <summary>
@@ -316,7 +317,7 @@ public class HttpStepDescriptionTests : HttpStepTestBase
 
         // Assert
         result.Status.Should().Be(ConfirmStatus.Success);
-        Server.LogEntries.Single().RequestMessage.Path.Should().Be("/api/configuration");
+        Server.ShouldHaveSingleRequest().Path.Should().Be("/api/configuration");
     }
 
     [Test]
@@ -445,16 +446,22 @@ public class HttpStepDescriptionTests : HttpStepTestBase
         await scenario.ConfirmSteps(new CatalogData(), cts.Token);
 
         // Assert
-        JsonObject sent = JsonNode.Parse(Server.LogEntries.Single().RequestMessage.Body!)!.AsObject();
+        IRequestMessage request = Server.ShouldHaveSingleRequest();
+        request.Body.Should().NotBeNull();
 
-        sent["searchText"]!.GetValue<string>().Should().Be("""say "hi" \ now""");
-        sent["shopId"]!.GetValue<int>().Should().Be(1149);
+        JsonNode? node = JsonNode.Parse(request.Body);
+        node.Should().NotBeNull();
+        JsonObject sent = node.AsObject();
+
+        sent["searchText"]?.GetValue<string>().Should().Be("""say "hi" \ now""");
+        sent["shopId"]?.GetValue<int>().Should().Be(1149);
         // Written "Accept-language" in the description and canonicalised to "Accept-Language" on the
         // wire by HttpRequestHeaders, which knows the standard spelling. Worth knowing before someone
         // asserts on the casing they typed.
-        Server.LogEntries.Single().RequestMessage.Headers!
-            .Should().ContainKey("Accept-Language")
-            .WhoseValue.Single().Should().Be("fr-FR");
+        request.Headers.Should().NotBeNull()
+            .And.ContainKey("Accept-Language")
+            .WhoseValue.Should().ContainSingle()
+            .Which.Should().Be("fr-FR");
     }
 
     /// <summary>

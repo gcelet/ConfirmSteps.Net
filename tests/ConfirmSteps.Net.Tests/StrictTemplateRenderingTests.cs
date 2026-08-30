@@ -96,10 +96,8 @@ public class StrictTemplateRenderingTests : HttpStepTestBase
 
         // Assert
         result.Status.Should().Be(ConfirmStatus.Failure);
-        result.StepResults[0].Exception.Should().BeOfType<UnresolvedTemplateVariableException>();
-
         UnresolvedTemplateVariableException exception =
-            (UnresolvedTemplateVariableException)result.StepResults[0].Exception!;
+            result.StepResults[0].Exception.Should().BeOfType<UnresolvedTemplateVariableException>().Which;
 
         exception.Unresolved.Should().HaveCount(1);
         exception.Unresolved[0].Name.Should().Be("USER_ID");
@@ -145,7 +143,7 @@ public class StrictTemplateRenderingTests : HttpStepTestBase
 
         // Assert
         UnresolvedTemplateVariableException exception =
-            (UnresolvedTemplateVariableException)result.StepResults[0].Exception!;
+            result.StepResults[0].Exception.Should().BeOfType<UnresolvedTemplateVariableException>().Which;
 
         exception.Unresolved.Select(u => u.Name).Should()
             .BeEquivalentTo("SHOP_ID", "PAGE", "CULTURE", "SEARCH_TEXT");
@@ -225,7 +223,7 @@ public class StrictTemplateRenderingTests : HttpStepTestBase
         // Assert
         result.Status.Should().Be(ConfirmStatus.Success);
         Server.LogEntries.Should().HaveCount(1);
-        Server.LogEntries.Single().RequestMessage.RawQuery.Should().Be("?search=");
+        Server.ShouldHaveSingleRequest().RawQuery.Should().Be("?search=");
     }
 
     /// <summary>

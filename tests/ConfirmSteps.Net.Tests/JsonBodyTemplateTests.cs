@@ -13,6 +13,8 @@ using ConfirmSteps.Templating;
 
 using static CancellationExtensions;
 
+using WireMock;
+
 [TestFixture]
 public class JsonBodyTemplateTests : HttpStepTestBase
 {
@@ -242,7 +244,7 @@ public class JsonBodyTemplateTests : HttpStepTestBase
 
         // Assert
         UnresolvedTemplateVariableException exception =
-            (UnresolvedTemplateVariableException)result.StepResults[0].Exception!;
+            result.StepResults[0].Exception.Should().BeOfType<UnresolvedTemplateVariableException>().Which;
 
         exception.Unresolved.Select(u => u.Location).Should()
             .BeEquivalentTo("body $.customer.shopId", "body $.items[0].id");
@@ -279,8 +281,11 @@ public class JsonBodyTemplateTests : HttpStepTestBase
         await scenario.ConfirmSteps(new BodyData(), cts.Token);
 
         // Assert
-        Server.LogEntries.Single().RequestMessage.Headers!["Content-Type"].Single()
-            .Should().StartWith("application/json");
+        IRequestMessage request = Server.ShouldHaveSingleRequest();
+        request.Headers.Should().NotBeNull()
+            .And.ContainKey("Content-Type")
+            .WhoseValue.Should().ContainSingle()
+            .Which.Should().StartWith("application/json");
     }
 
     /// <summary>
@@ -326,9 +331,13 @@ public class JsonBodyTemplateTests : HttpStepTestBase
 
         result.Status.Should().Be(ConfirmStatus.Success);
 
-        string sent = Server.LogEntries.Single().RequestMessage.Body!;
+        IRequestMessage request = Server.ShouldHaveSingleRequest();
+        request.Body.Should().NotBeNull();
 
-        return JsonNode.Parse(sent)!.AsObject();
+        JsonNode? node = JsonNode.Parse(request.Body);
+        node.Should().NotBeNull();
+
+        return node.AsObject();
     }
 
     public class BodyData

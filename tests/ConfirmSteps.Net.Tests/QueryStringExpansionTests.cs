@@ -54,7 +54,7 @@ public class QueryStringExpansionTests : HttpStepTestBase
         result.Status.Should().Be(ConfirmStatus.Success);
 
         string expected = "?" + string.Join("&", modelIds.Select(id => $"modelIds={id}"));
-        Server.LogEntries.Single().RequestMessage.RawQuery.Should().Be(expected);
+        Server.ShouldHaveSingleRequest().RawQuery.Should().Be(expected);
     }
 
     /// <summary>
@@ -95,7 +95,7 @@ public class QueryStringExpansionTests : HttpStepTestBase
         await scenario.ConfirmSteps(new ExpansionData(), cts.Token);
 
         // Assert
-        Server.LogEntries.Single().RequestMessage.RawQuery.Should()
+        Server.ShouldHaveSingleRequest().RawQuery.Should()
             .Be("?page=1&modelIds=9587&modelIds=4841&range=1-20");
     }
 
@@ -136,7 +136,7 @@ public class QueryStringExpansionTests : HttpStepTestBase
         await scenario.ConfirmSteps(new ExpansionData(), cts.Token);
 
         // Assert
-        Server.LogEntries.Single().RequestMessage.RawQuery.Should().Be("?page=1");
+        Server.ShouldHaveSingleRequest().RawQuery.Should().Be("?page=1");
     }
 
     /// <summary>
@@ -174,7 +174,7 @@ public class QueryStringExpansionTests : HttpStepTestBase
         await scenario.ConfirmSteps(new ExpansionData(), cts.Token);
 
         // Assert
-        Server.LogEntries.Single().RequestMessage.RawQuery.Should().Be("?modelIds=9587&modelIds=4841");
+        Server.ShouldHaveSingleRequest().RawQuery.Should().Be("?modelIds=9587&modelIds=4841");
     }
 
     /// <summary>
@@ -211,7 +211,7 @@ public class QueryStringExpansionTests : HttpStepTestBase
         await scenario.ConfirmSteps(new ExpansionData(), cts.Token);
 
         // Assert
-        Server.LogEntries.Single().RequestMessage.RawQuery.Should().Be("?search=frein");
+        Server.ShouldHaveSingleRequest().RawQuery.Should().Be("?search=frein");
     }
 
     /// <summary>
@@ -250,9 +250,8 @@ public class QueryStringExpansionTests : HttpStepTestBase
 
         // Assert
         result.Status.Should().Be(ConfirmStatus.Failure);
-        result.StepResults[0].Exception.Should().BeOfType<MultiValuedTemplateVariableException>();
-        ((MultiValuedTemplateVariableException)result.StepResults[0].Exception!).VariableName.Should()
-            .Be("MODEL_IDS");
+        result.StepResults[0].Exception.Should().BeOfType<MultiValuedTemplateVariableException>()
+            .Which.VariableName.Should().Be("MODEL_IDS");
         Server.LogEntries.Should().BeEmpty();
     }
 
