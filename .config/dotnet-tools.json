@@ -17,21 +17,21 @@
       "rollForward": false
     },
     "coverlet.console": {
-      "version": "10.0.0  ",
+      "version": "10.0.1",
       "commands": [
         "coverlet"
       ],
       "rollForward": false
     },
     "jetbrains.resharper.globaltools": {
-      "version": "2026.1.1",
+      "version": "2026.2.1",
       "commands": [
         "jb"
       ],
       "rollForward": false
     },
     "dotnet-reportgenerator-globaltool": {
-      "version": "5.5.7",
+      "version": "5.5.11",
       "commands": [
         "reportgenerator"
       ],
