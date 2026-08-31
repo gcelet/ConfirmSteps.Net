@@ -1,0 +1,68 @@
+# git-cliff configuration — https://git-cliff.org/docs/configuration
+#
+# Generates release notes from commit messages of the form
+# ":emoji: type(scope): description" (gitmoji + conventional commits).
+#
+# Usage, right before cutting a release (on develop, before merging to main):
+#   git cliff --tag vX.Y.Z -o CHANGELOG.md
+#   git add CHANGELOG.md && git commit -m ":memo: docs: update changelog for vX.Y.Z"
+#
+# To preview the unreleased section only, without writing anything:
+#   git cliff --unreleased --strip header
+
+[changelog]
+header = """
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+"""
+body = """
+{% if version %}\
+    ## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}
+{% else %}\
+    ## [Unreleased]
+{% endif %}\
+{% for group, commits in commits | group_by(attribute="group") %}
+    ### {{ group | upper_first }}
+    {% for commit in commits %}
+        - {{ commit.message | upper_first | trim }}{% if commit.breaking %} **BREAKING**{% endif %}\
+    {% endfor %}
+{% endfor %}\n
+"""
+footer = ""
+trim = true
+postprocessors = []
+
+[git]
+conventional_commits = true
+filter_unconventional = true
+split_commits = false
+
+# Strip the leading gitmoji (":sparkles: ", ":bug: ", ...) so the
+# conventional-commit parser sees a clean "type(scope): description".
+commit_preprocessors = [
+  { pattern = '^:[a-zA-Z0-9_+-]+:\s*', replace = "" },
+]
+
+commit_parsers = [
+  { message = '^\w+\(ci\)', skip = true },
+  { message = '^\w+\(build\)', skip = true },
+  { message = '^\w+\(deps\)', skip = true },
+  { message = "^feat", group = "Added" },
+  { message = "^fix", group = "Fixed" },
+  { message = "^perf", group = "Changed" },
+  { message = "^refactor", group = "Changed" },
+  { message = "^revert", group = "Changed" },
+  { body = ".*BREAKING CHANGE", group = "Changed" },
+  { message = "^docs?|^style|^test|^chore|^ci|^build", skip = true },
+]
+
+protect_breaking_commits = true
+filter_commits = false
+tag_pattern = "v[0-9]*"
+topo_order = false
+sort_commits = "oldest"

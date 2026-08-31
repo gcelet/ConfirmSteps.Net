@@ -35,6 +35,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02-files", "02-files", "{7B
 		global.json = global.json
 		PackageReadme.md = PackageReadme.md
 		README.md = README.md
+		cliff.toml = cliff.toml
 	EndProjectSection
 EndProject
 Global
