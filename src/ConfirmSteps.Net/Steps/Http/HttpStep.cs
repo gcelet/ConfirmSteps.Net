@@ -25,7 +25,7 @@ public sealed class HttpStep<T> : Step<T>
   /// <param name="extractors">A list of extractors to pull data from the HTTP response.</param>
   public HttpStep(string title, RequestBuilder requestBuilder,
     IReadOnlyList<IHttpResponseVerifier<T>> verifiers,
-    HttpResponseVerificationMode verificationMode,
+    StepVerificationMode verificationMode,
     IReadOnlyList<IHttpResponseExtractor<T>> extractors)
     : base(title, new HttpStepPreparer(requestBuilder), new HttpStepExecutor(),
       new HttpStepVerifier(verifiers, verificationMode), new HttpStepExtractor(extractors))
@@ -111,13 +111,13 @@ public sealed class HttpStep<T> : Step<T>
 
   private class HttpStepVerifier : IStepVerifier<T>
   {
-    public HttpStepVerifier(IReadOnlyList<IHttpResponseVerifier<T>> verifiers, HttpResponseVerificationMode verificationMode)
+    public HttpStepVerifier(IReadOnlyList<IHttpResponseVerifier<T>> verifiers, StepVerificationMode verificationMode)
     {
       Verifiers = verifiers;
       VerificationMode = verificationMode;
     }
 
-    private HttpResponseVerificationMode VerificationMode { get; }
+    private StepVerificationMode VerificationMode { get; }
 
     private IReadOnlyList<IHttpResponseVerifier<T>> Verifiers { get; }
 
@@ -142,7 +142,7 @@ public sealed class HttpStep<T> : Step<T>
         {
           confirmStatus = ConfirmStatus.Failure;
           exceptions.Add(exception);
-          if (VerificationMode == HttpResponseVerificationMode.StopOnFirstFailure)
+          if (VerificationMode == StepVerificationMode.StopOnFirstFailure)
           {
             break;
           }

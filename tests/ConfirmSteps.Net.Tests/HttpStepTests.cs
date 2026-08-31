@@ -8,10 +8,10 @@ using System.Text.Json.Serialization;
 using AwesomeAssertions;
 using AwesomeAssertions.Execution;
 
+using ConfirmSteps.Steps;
 using ConfirmSteps.Steps.Http;
 using ConfirmSteps.Steps.Http.Problems;
 using ConfirmSteps.Steps.Http.RequestBuilding;
-using ConfirmSteps.Steps.Http.ResponseVerification;
 
 using static CancellationExtensions;
 
@@ -435,7 +435,7 @@ public class HttpStepTests : HttpStepTestBase
           .HttpStep("[Step-01]-GET-/users/1",
             () => RequestBuilder.Get().AppendPathSegments("users", "1"),
             step => step
-              .WithVerificationMode(HttpResponseVerificationMode.VerifyAll)
+              .WithVerificationMode(StepVerificationMode.VerifyAll)
               .Verify((_, _) => throw new Exception("Fail from HttpResponseMessage verification"))
               .VerifyJson((_, _) => throw new Exception("Fail from HttpResponseJson verification"))
               .VerifyRestApiResult((_, _) => throw new Exception("Fail from RestApiResult verification"))

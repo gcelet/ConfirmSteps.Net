@@ -34,7 +34,7 @@ public sealed class HttpStepBuilder<T> : IStepBuilder<T>
 
   private string Title { get; }
 
-  private HttpResponseVerificationMode VerificationMode { get; set; } = HttpResponseVerificationMode.StopOnFirstFailure;
+  private StepVerificationMode VerificationMode { get; set; } = StepVerificationMode.StopOnFirstFailure;
 
   private List<IHttpResponseVerifier<T>> Verifiers { get; } = new();
 
@@ -174,7 +174,7 @@ public sealed class HttpStepBuilder<T> : IStepBuilder<T>
   /// </summary>
   /// <param name="verificationMode">The mode of HTTP response verification to be applied for this step.</param>
   /// <returns>>The current <see cref="HttpStepBuilder{T}"/> for fluent chaining.</returns>
-  public HttpStepBuilder<T> WithVerificationMode(HttpResponseVerificationMode verificationMode)
+  public HttpStepBuilder<T> WithVerificationMode(StepVerificationMode verificationMode)
   {
     VerificationMode = verificationMode;
     return this;
