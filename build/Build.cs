@@ -1,17 +1,21 @@
 using System;
-using Nuke.Common;
-using Nuke.Common.CI.GitHubActions;
-using Nuke.Common.Git;
-using Nuke.Common.IO;
-using Nuke.Common.ProjectModel;
-using Nuke.Common.Tooling;
-using Nuke.Common.Tools.DotNet;
-using Nuke.Common.Tools.GitVersion;
-using Nuke.Common.Tools.ReportGenerator;
-using Nuke.Common.Utilities;
-using Nuke.Common.Utilities.Collections;
-using static Nuke.Common.Tools.DotNet.DotNetTasks;
-using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
+
+using Fallout.Common;
+using Fallout.Common.CI.GitHubActions;
+using Fallout.Common.Git;
+using Fallout.Common.IO;
+using Fallout.Common.Tooling;
+using Fallout.Common.Tools.DotNet;
+using Fallout.Common.Tools.GitVersion;
+using Fallout.Common.Tools.ReportGenerator;
+using Fallout.Common.Utilities;
+using Fallout.Common.Utilities.Collections;
+
+using Fallout.Solutions;
+
+using static Fallout.Common.Tools.DotNet.DotNetTasks;
+using static Fallout.Common.Tools.ReportGenerator.ReportGeneratorTasks;
+
 using static Serilog.Log;
 
 [GitHubActions("continuous",
@@ -41,10 +45,10 @@ using static Serilog.Log;
     nameof(CoverallsRepoToken)
   }
 )]
-class Build : NukeBuild
+class Build : FalloutBuild
 {
-    [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
-    readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
+    [Parameter("Configuration to build - Default is 'Release'")]
+    readonly Configuration Configuration = Configuration.Release;
 
     [Parameter("Output directory for build artifacts")]
     readonly AbsolutePath BuildDirectory = RootDirectory / ".build";
@@ -82,7 +86,7 @@ class Build : NukeBuild
 
     AbsolutePath SrcDirectory => RootDirectory / "src";
 
-    AbsolutePath TestsDirectory => RootDirectory / "tst";
+    AbsolutePath TestsDirectory => RootDirectory / "tests";
 
     AbsolutePath TestResultsDirectory => BuildDirectory / "test-results";
 
@@ -100,11 +104,6 @@ class Build : NukeBuild
       ? $"https://nuget.pkg.github.com/{GitHubActions.RepositoryOwner??string.Empty}/index.json"
       : string.Empty;
 
-    /// Support plugins are available for:
-    ///   - JetBrains ReSharper        https://nuke.build/resharper
-    ///   - JetBrains Rider            https://nuke.build/rider
-    ///   - Microsoft VisualStudio     https://nuke.build/visualstudio
-    ///   - Microsoft VSCode           https://nuke.build/vscode
     public static int Main() => Execute<Build>(x => x.ContinuousIntegration);
 
     Target GenerateVersionDetails => _ => _
@@ -213,9 +212,10 @@ class Build : NukeBuild
             .When(!string.IsNullOrEmpty(dataCollector), t => t
               .SetDataCollector(dataCollector)
               .SetProcessAdditionalArguments(
-                  "-- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura",
-                  "-- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Include=\"[ConfirmStep.Net]*\"",
-                  "-- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Exclude=\"[*.Tests]*\""
+                  "--",
+                  "DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura",
+                  "DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Include=\"[ConfirmSteps.Net]*\"",
+                  "DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Exclude=\"[*.Tests]*\""
                 )
               )
             );

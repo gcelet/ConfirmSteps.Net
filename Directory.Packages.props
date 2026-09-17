@@ -52,12 +52,8 @@
   </ItemGroup>
   <!-- Build dependencies -->
   <ItemGroup>
-    <PackageVersion Include="Microsoft.Build" Version="18.10.1" />
-    <PackageVersion Include="Microsoft.Build.Tasks.Core" Version="18.10.1" />
-    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="18.10.1" />
     <PackageVersion Include="NuGet.Frameworks" Version="7.9.0" />
-    <PackageVersion Include="Nuke.Common" Version="10.1.0" />
-    <PackageVersion Include="docfx.console" Version="2.59.4" />
+    <PackageVersion Include="Fallout.Common" Version="10.4.0" />
   </ItemGroup>
   <!-- SourceLink support for all projects -->
   <ItemGroup>

@@ -485,4 +485,5 @@ fabric.properties
 ## Project specific ##
 ######################
 .build
+.fallout/temp/
 

@@ -5,25 +5,21 @@
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace></RootNamespace>
     <NoWarn>CS0649;CS0169;CA1050;CA1822;CA2211;IDE1006</NoWarn>
-    <NukeRootDirectory>..</NukeRootDirectory>
-    <NukeScriptDirectory>..</NukeScriptDirectory>
-    <NukeTelemetryVersion>1</NukeTelemetryVersion>
+    <FalloutRootDirectory>..</FalloutRootDirectory>
+    <FalloutScriptDirectory>..</FalloutScriptDirectory>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build" />
-    <PackageReference Include="Microsoft.Build.Tasks.Core" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" />
     <PackageReference Include="NuGet.Frameworks" />
-    <PackageReference Include="Nuke.Common"/>
+    <PackageReference Include="Fallout.Common"/>
   </ItemGroup>
 
   <ItemGroup>
     <PackageDownload Include="coveralls.net" Version="[4.0.1]" />
-    <PackageDownload Include="dotnet-coverage" Version="[17.14.2]" />
-    <PackageDownload Include="GitVersion.Tool" Version="[6.7.0]"/>
-    <PackageDownload Include="ReportGenerator" Version="[5.5.4]"/>
+    <PackageDownload Include="dotnet-coverage" Version="[18.10.0]" />
+    <PackageDownload Include="GitVersion.Tool" Version="[6.8.2]"/>
+    <PackageDownload Include="ReportGenerator" Version="[5.5.11]"/>
   </ItemGroup>
 
 </Project>
