@@ -33,7 +33,7 @@
     <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.12" />
     <PackageVersion Include="NUnit" Version="4.6.1" />
     <PackageVersion Include="NUnit.Analyzers" Version="4.15.0" />
-    <PackageVersion Include="WireMock.Net" Version="2.15.0" />
+    <PackageVersion Include="WireMock.Net" Version="2.16.0" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
